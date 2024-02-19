@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface PermissionRepository extends JpaRepository<PermissionEntity, Long> {
     public PermissionEntity findByResourceIdAndResourceTypeAndUserId(Long resourceId, ResourceType resourceType, Long userId);
+    public void deleteAllByResourceIdAndResourceType(Long resourceId, ResourceType resourceType);
 }

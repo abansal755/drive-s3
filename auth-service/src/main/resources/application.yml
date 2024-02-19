@@ -1,0 +1,21 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/auth-server
+    username: root
+    password: root
+  main:
+    allow-circular-references: true
+jwt:
+  secret-key: 8f1509f6771c946c7530c999733712bad16641060f285ee4b7d4a685df414d5c
+  access-expire-after-millis: 3600000
+  refresh-expire-after-millis: 86400000
+oauth2:
+  client:
+    github:
+      client-id: 863da1c4cee91b2ee043
+      client-secret: 96ae3344a40941d5c35281f271c496863ab8239c
+      redirect-uri: http://localhost:8080/login/oauth2/github/callback

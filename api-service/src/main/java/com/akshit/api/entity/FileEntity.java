@@ -19,17 +19,15 @@ public class FileEntity {
     private Long id;
 
     @Column(nullable = false)
-    private long parentFolderId;
+    private Long parentFolderId;
 
     @Column(nullable = false)
     private String name;
 
     private String extension;
 
-    @Column(nullable = false)
     private String s3BucketName;
 
-    @Column(nullable = false)
     private String s3ObjectKey;
 
     @Column(nullable = false)

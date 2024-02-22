@@ -15,6 +15,11 @@ public class FolderController {
     @Autowired
     private FolderService folderService;
 
+    @GetMapping("root")
+    public Folder getRootFolder(@AuthenticationPrincipal User user){
+        return folderService.getRootFolderForUser(user);
+    }
+
     @GetMapping("{folderId}")
     public ResponseEntity<FolderContentsResponse> getFolderContents(@PathVariable Long folderId, @AuthenticationPrincipal User user){
         return folderService.getFolderContents(folderId, user);

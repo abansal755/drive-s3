@@ -69,7 +69,7 @@ public class FolderService {
         return (mapping.getUserId() == user.getId());
     }
 
-    private PermissionType getFolderPermissionForUser(FolderEntity folder, User user){
+    public PermissionType getFolderPermissionForUser(FolderEntity folder, User user){
         FolderEntity currentFolder = folder;
         while(true){
             PermissionEntity permission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(
@@ -107,6 +107,7 @@ public class FolderService {
 
             List<FileEntity> files = getChildFiles(folder);
             for(FileEntity file:files){
+                // TODO: delete file from s3
                 permissionRepository.deleteAllByResourceIdAndResourceType(file.getId(), ResourceType.FILE);
                 fileRepository.deleteById(file.getId());
             }
@@ -213,5 +214,11 @@ public class FolderService {
                     .build();
         deleteFolderTree(folder);
         return ResponseEntity.ok().build();
+    }
+
+    public Folder getRootFolderForUser(User user){
+        UserRootFolderMappingEntity mapping = userRootFolderMappingRepository.findByUserId(user.getId());
+        FolderEntity rootFolder = folderRepository.findFolderEntityById(mapping.getFolderId());
+        return Folder.fromEntity(rootFolder);
     }
 }

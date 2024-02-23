@@ -11,6 +11,8 @@ spring:
     url: jdbc:mysql://localhost:3306/drive-s3
     username: root
     password: root
+  main:
+    allow-circular-references: true
 s3:
   bucket-name: akshit-drive-demo
 temp-file-storage: C:\Users\Akshit\.api-service

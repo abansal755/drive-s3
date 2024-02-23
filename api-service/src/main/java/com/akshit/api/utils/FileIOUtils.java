@@ -3,6 +3,7 @@ package com.akshit.api.utils;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -46,5 +47,14 @@ public class FileIOUtils {
                     .build();
         ResponseInputStream<GetObjectResponse> inputStream = s3Client.getObject(getObjectRequest);
         return new BufferedInputStream(inputStream);
+    }
+
+    public static void deleteS3Object(S3Client s3Client, String s3BucketName, String s3ObjectKey){
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest
+                .builder()
+                .bucket(s3BucketName)
+                .key(s3ObjectKey)
+                .build();
+        s3Client.deleteObject(deleteObjectRequest);
     }
 }

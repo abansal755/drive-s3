@@ -30,6 +30,9 @@ public class FolderService {
     @Autowired
     private FileRepository fileRepository;
 
+    @Autowired
+    private FileService fileService;
+
     private FolderEntity getParentFolder(FolderEntity folder){
         Long parentFolderId = folder.getParentFolderId();
         if(parentFolderId == null) return null;
@@ -93,24 +96,24 @@ public class FolderService {
         return fileRepository.findAllByParentFolderId(folder.getId());
     }
 
+    private void deleteFolder(FolderEntity folder){
+        permissionRepository.deleteAllByResourceIdAndResourceType(folder.getId(), ResourceType.FOLDER);
+        folderRepository.deleteById(folder.getId());
+    }
+
     private void deleteFolderTree(FolderEntity folder){
         ArrayDeque<FolderEntity> deque = new ArrayDeque<>();
         deque.addLast(folder);
         while(!deque.isEmpty()){
             FolderEntity head = deque.poll();
+            deleteFolder(head);
+
             List<FolderEntity> children = getChildFolders(head);
             for(FolderEntity child:children)
                 deque.addLast(child);
-
-            permissionRepository.deleteAllByResourceIdAndResourceType(head.getId(), ResourceType.FOLDER);
-            folderRepository.deleteById(head.getId());
-
             List<FileEntity> files = getChildFiles(folder);
-            for(FileEntity file:files){
-                // TODO: delete file from s3
-                permissionRepository.deleteAllByResourceIdAndResourceType(file.getId(), ResourceType.FILE);
-                fileRepository.deleteById(file.getId());
-            }
+            for(FileEntity file:files)
+                fileService.deleteFile(file.getId());
         }
     }
 
@@ -187,7 +190,7 @@ public class FolderService {
                     .status(HttpStatus.FORBIDDEN)
                     .build();
         String newFolderName = folderUpdateRequest.getFolderName();
-        if((newFolderName == null) || (newFolderName == folder.getFolderName()))
+        if((newFolderName == null) || (newFolderName.equals(folder.getFolderName())))
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .build();

@@ -1,8 +1,6 @@
 package com.akshit.api.controller;
 
-import com.akshit.api.model.FileCreateRequest;
-import com.akshit.api.model.FileCreateResponse;
-import com.akshit.api.model.User;
+import com.akshit.api.model.*;
 import com.akshit.api.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,5 +25,15 @@ public class FileController {
     @GetMapping("{fileId}/download")
     public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable Long fileId, @AuthenticationPrincipal User user) throws IOException {
         return fileService.downloadFile(fileId, user);
+    }
+
+    @PatchMapping("{fileId}")
+    public ResponseEntity<File> modifyFile(@RequestBody FileUpdateRequest fileUpdateRequest, @PathVariable Long fileId, @AuthenticationPrincipal User user){
+        return fileService.modifyFile(fileUpdateRequest, fileId, user);
+    }
+
+    @DeleteMapping("{fileId}")
+    public ResponseEntity<Void> deleteFile(@PathVariable Long fileId, @AuthenticationPrincipal User user){
+        return fileService.deleteFile(fileId, user);
     }
 }

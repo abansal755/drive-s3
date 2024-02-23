@@ -25,7 +25,7 @@ public class FileUploadController {
         return fileUploadService.getUploadStatus(uploadId, user);
     }
 
-    @PostMapping("{uploadId}")
+    @PutMapping("{uploadId}")
     public ResponseEntity<Void> upload(HttpServletRequest request, @PathVariable Long uploadId, @AuthenticationPrincipal User user) throws IOException {
         return fileUploadService.upload(request, uploadId, user);
     }

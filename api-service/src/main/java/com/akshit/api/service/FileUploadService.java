@@ -7,22 +7,22 @@ import com.akshit.api.model.UploadStatusResponse;
 import com.akshit.api.model.User;
 import com.akshit.api.repo.FileRepository;
 import com.akshit.api.repo.FileUploadRepository;
-import jakarta.servlet.ServletInputStream;
+import com.akshit.api.utils.FileIOUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.BufferedInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static com.akshit.api.utils.FileIOUtils.*;
 
 @Service
 public class FileUploadService {
@@ -37,7 +37,10 @@ public class FileUploadService {
     private S3Client s3Client;
 
     @Value("${s3.bucket-name}")
-    private String s3BucketName;
+    private String S3_BUCKET_NAME;
+
+    @Value("${temp-file-storage}")
+    private String TEMP_FILE_STORAGE_DIR;
 
     public ResponseEntity<UploadStatusResponse> getUploadStatus(Long uploadId,User user){
         FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
@@ -57,6 +60,7 @@ public class FileUploadService {
     }
 
     public ResponseEntity<Void> upload(HttpServletRequest request, Long uploadId, User user) throws IOException {
+        // validations
         FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
         if(fileUpload == null)
             return ResponseEntity
@@ -71,27 +75,26 @@ public class FileUploadService {
                     .status(HttpStatus.FORBIDDEN)
                     .build();
 
+        // set status to uploading
         fileUpload.setUploadStatus(UploadStatus.UPLOADING);
         fileUploadRepository.save(fileUpload);
 
+        // upload
         FileEntity file = fileRepository.findFileEntityById(fileUpload.getFileId());
+        String fileName = file.getId().toString();
         BufferedInputStream inputStream = new BufferedInputStream(request.getInputStream());
-        long contentLength = Long.parseLong(request.getHeader("x-content-length"));
+        createDirectoryHierarchyIfNotExists(TEMP_FILE_STORAGE_DIR);
+        downloadStreamToFile(inputStream, TEMP_FILE_STORAGE_DIR + File.separator + fileName);
+        putS3Object(s3Client, S3_BUCKET_NAME, fileName, TEMP_FILE_STORAGE_DIR + File.separator + fileName);
+        deleteFileIfExists(TEMP_FILE_STORAGE_DIR + File.separator + fileName);
 
-        String bucketName = s3BucketName;
-        String objectKey = file.getId().toString();
-        PutObjectRequest putObjectRequest = PutObjectRequest
-                .builder()
-                .bucket(bucketName)
-                .key(objectKey)
-                .build();
-        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
-
+        // update status to uploaded
         fileUpload.setUploadStatus(UploadStatus.UPLOADED);
         fileUploadRepository.save(fileUpload);
 
-        file.setS3BucketName(bucketName);
-        file.setS3ObjectKey(objectKey);
+        // update file's s3 info
+        file.setS3BucketName(S3_BUCKET_NAME);
+        file.setS3ObjectKey(fileName);
         fileRepository.save(file);
 
         return ResponseEntity.ok().build();

@@ -13,3 +13,4 @@ spring:
     password: root
 s3:
   bucket-name: akshit-drive-demo
+temp-file-storage: C:\Users\Akshit\.api-service

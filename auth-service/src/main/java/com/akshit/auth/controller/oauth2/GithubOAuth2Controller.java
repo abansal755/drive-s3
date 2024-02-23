@@ -89,7 +89,7 @@ public class GithubOAuth2Controller {
         if(error != null)
             return ResponseEntity
                     .status(HttpStatus.FOUND)
-                    .header(HttpHeaders.LOCATION, (referer != "") ? referer : "http://localhost:8080")
+                    .header(HttpHeaders.LOCATION, (!referer.equals("")) ? referer : "http://localhost:8080")
                     .header(HttpHeaders.SET_COOKIE, removeStateCookie.toString())
                     .build();
 
@@ -107,7 +107,7 @@ public class GithubOAuth2Controller {
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, (referer != "") ? referer : "http://localhost:8080")
+                .header(HttpHeaders.LOCATION, (!referer.equals("")) ? referer : "http://localhost:8080")
                 .header(HttpHeaders.SET_COOKIE, Cookies.getAccessTokenCookie(accessToken).toString())
                 .header(HttpHeaders.SET_COOKIE, Cookies.getRefreshTokenCookie(refreshToken).toString())
                 .header(HttpHeaders.SET_COOKIE, removeStateCookie.toString())

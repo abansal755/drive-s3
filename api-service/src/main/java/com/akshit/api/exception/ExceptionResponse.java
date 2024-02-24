@@ -16,5 +16,6 @@ import java.util.List;
 public class ExceptionResponse {
     private HttpStatus status;
     private String message;
+    private String exception;
     private List<String> stackTrace;
 }

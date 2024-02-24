@@ -6,7 +6,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,13 +20,19 @@ public class ExceptionHandlers {
     @Autowired
     private Environment environment;
 
-    private List<String> getStackTraceListFromException(Exception exception){
+    private List<String> getExceptionStackStrace(Exception exception){
         if(environment.matchesProfiles("production"))
             return null;
         return Arrays
                 .stream(exception.getStackTrace())
                 .map(StackTraceElement::toString)
                 .toList();
+    }
+
+    private String getExceptionString(Exception exception){
+        if(environment.matchesProfiles("production"))
+            return null;
+        return exception.toString();
     }
 
     @ExceptionHandler
@@ -45,7 +50,8 @@ public class ExceptionHandlers {
                         .builder()
                         .status(status)
                         .message(message)
-                        .stackTrace(getStackTraceListFromException(exception))
+                        .exception(getExceptionString(exception))
+                        .stackTrace(getExceptionStackStrace(exception))
                         .build());
     }
 
@@ -56,7 +62,8 @@ public class ExceptionHandlers {
                 .builder()
                 .status(HttpStatus.UNAUTHORIZED)
                 .message("Unable to authenticate")
-                .stackTrace(getStackTraceListFromException(authException))
+                .exception(getExceptionString(authException))
+                .stackTrace(getExceptionStackStrace(authException))
                 .build();
     }
 
@@ -72,7 +79,8 @@ public class ExceptionHandlers {
                                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                                 .findFirst()
                                 .orElse(exception.getMessage()))
-                .stackTrace(getStackTraceListFromException(exception))
+                .exception(getExceptionString(exception))
+                .stackTrace(getExceptionStackStrace(exception))
                 .build();
     }
 
@@ -83,7 +91,8 @@ public class ExceptionHandlers {
                 .builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Something went wrong")
-                .stackTrace(getStackTraceListFromException(exception))
+                .exception(getExceptionString(exception))
+                .stackTrace(getExceptionStackStrace(exception))
                 .build();
     }
 }

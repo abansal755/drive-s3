@@ -1,6 +1,7 @@
 package com.akshit.api.config;
 
 import com.akshit.api.filter.AuthFilter;
+import com.akshit.api.filter.DelegatedAuthenticationEntryPoint;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,9 @@ public class SecurityConfig {
     @Autowired
     private AuthFilter authFilter;
 
+    @Autowired
+    private DelegatedAuthenticationEntryPoint delegatedAuthenticationEntryPoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -33,6 +37,9 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest()
                         .authenticated()
+                )
+                .exceptionHandling(exception ->
+                    exception.authenticationEntryPoint(delegatedAuthenticationEntryPoint)
                 )
                 .build();
     }

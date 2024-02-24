@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +32,17 @@ public class ExceptionHandlers {
                         .message(message)
                         .stackTrace(environment.matchesProfiles("production") ? null : exception.getStackTrace())
                         .build());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ExceptionResponse authenticationException(AuthenticationException authException){
+        return ExceptionResponse
+                .builder()
+                .status(HttpStatus.UNAUTHORIZED)
+                .message("Unable to authenticate")
+                .stackTrace(environment.matchesProfiles("production") ? null : authException.getStackTrace())
+                .build();
     }
 
     @ExceptionHandler

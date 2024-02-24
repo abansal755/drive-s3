@@ -1,5 +1,6 @@
 package com.akshit.api.exception;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 
@@ -9,7 +10,9 @@ import org.springframework.http.HttpStatus;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 public class ExceptionResponse {
     private HttpStatus status;
     private String message;
+    private StackTraceElement[] stackTrace;
 }

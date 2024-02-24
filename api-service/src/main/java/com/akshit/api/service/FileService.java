@@ -22,8 +22,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.io.*;
 import java.util.Date;
 
-import static com.akshit.api.utils.FileIOUtils.*;
-
 @Service
 public class FileService {
 
@@ -40,16 +38,13 @@ public class FileService {
     private FolderService folderService;
 
     @Autowired
-    private S3Client s3Client;
-
-    @Autowired
     private PermissionRepository permissionRepository;
 
-    @Value("${s3.bucket-name}")
-    private String S3_BUCKET_NAME;
+    @Autowired
+    private S3Service s3Service;
 
-    @Value("${temp-file-storage}")
-    private String TEMP_FILE_STORAGE_DIR;
+    @Autowired
+    private TempStorageService tempStorageService;
 
     private PermissionType getFilePermissionForUser(FileEntity file, User user){
         PermissionEntity permission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(file.getId(), ResourceType.FILE, user.getId());
@@ -62,7 +57,7 @@ public class FileService {
     public void deleteFile(Long fileId){
         fileRepository.deleteById(fileId);
         permissionRepository.deleteAllByResourceIdAndResourceType(fileId, ResourceType.FILE);
-        deleteS3Object(s3Client, S3_BUCKET_NAME, fileId.toString());
+        s3Service.deleteS3Object(fileId.toString());
     }
 
     public ResponseEntity<FileCreateResponse> createFile(FileCreateRequest fileCreateRequest, User user){
@@ -112,23 +107,22 @@ public class FileService {
 
         // download file from s3
         String fileName = file.getId().toString();
-        BufferedInputStream inputStream = getS3Object(s3Client, S3_BUCKET_NAME, fileName);
-        createDirectoryHierarchyIfNotExists(TEMP_FILE_STORAGE_DIR);
-        downloadStreamToFile(inputStream, TEMP_FILE_STORAGE_DIR + File.separator + fileName);
+        BufferedInputStream inputStream = s3Service.getS3Object(fileName);
+        tempStorageService.downloadStreamToFile(inputStream, fileName);
         inputStream.close();
 
         return ResponseEntity.ok(
                 (OutputStream outputStream) -> {
                     // read the downloaded file and stream it as response body
                     BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-                    BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(TEMP_FILE_STORAGE_DIR + File.separator + fileName));
+                    BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(tempStorageService.getPath(fileName)));
 
                     int b;
                     while((b = bufferedInputStream.read()) != -1)
                         bufferedOutputStream.write(b);
                     bufferedOutputStream.flush();
                     bufferedInputStream.close();
-                    deleteFileIfExists(TEMP_FILE_STORAGE_DIR + File.separator + fileName);
+                    tempStorageService.deleteFileIfExists(fileName);
                 });
     }
 

@@ -70,7 +70,7 @@ public class FolderService {
     private boolean checkIfFolderIsOwnedByUser(FolderEntity folder, User user){
         FolderEntity rootFolder = getRootFolder(folder);
         UserRootFolderMappingEntity mapping = userRootFolderMappingRepository.findByFolderId(rootFolder.getId());
-        return (mapping.getUserId() == user.getId());
+        return (mapping.getUserId().equals(user.getId()));
     }
 
     public PermissionType getFolderPermissionForUser(FolderEntity folder, User user){
@@ -85,7 +85,7 @@ public class FolderService {
             if(parentFolder == null) break;
             currentFolder = parentFolder;
         }
-        if(checkIfFolderIsOwnedByUser(currentFolder, user)) return  PermissionType.WRITE;
+        if(checkIfFolderIsOwnedByUser(currentFolder, user)) return PermissionType.WRITE;
         return null;
     }
 

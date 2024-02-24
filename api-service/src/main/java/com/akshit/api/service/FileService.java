@@ -1,6 +1,7 @@
 package com.akshit.api.service;
 
 import com.akshit.api.entity.*;
+import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.FileCreateRequest;
 import com.akshit.api.model.FileCreateResponse;
 import com.akshit.api.model.FileUpdateRequest;
@@ -60,17 +61,28 @@ public class FileService {
         s3Service.deleteS3Object(fileId.toString());
     }
 
-    public ResponseEntity<FileCreateResponse> createFile(FileCreateRequest fileCreateRequest, User user){
+    public void fileExistenceRequiredValidation(FileEntity folder) throws ApiException {
+        if(folder == null)
+            throw new ApiException("File not found", HttpStatus.NOT_FOUND);
+    }
+
+    public void fileReadPermissionRequiredValidation(PermissionType permission) throws ApiException {
+        if(permission == null)
+            throw new ApiException("User doesn't have read permission for this file", HttpStatus.FORBIDDEN);
+    }
+
+    public void fileWritePermissionRequiredValidation(PermissionType permission) throws ApiException {
+        if(permission != PermissionType.WRITE)
+            throw new ApiException("User doesn't have write permission for this file", HttpStatus.FORBIDDEN);
+    }
+
+    public FileCreateResponse createFile(FileCreateRequest fileCreateRequest, User user) throws ApiException {
         FolderEntity parentFolder = folderRepository.findFolderEntityById(fileCreateRequest.getParentFolderId());
         if(parentFolder == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
+            throw new ApiException("Parent folder not found", HttpStatus.BAD_REQUEST);
+
         PermissionType permission = folderService.getFolderPermissionForUser(parentFolder, user);
-        if(permission != PermissionType.WRITE)
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+        folderService.folderWritePermissionRequiredValidation(permission);
 
         FileEntity file = fileRepository.save(FileEntity
                         .builder()
@@ -86,24 +98,19 @@ public class FileService {
                         .fileId(file.getId())
                         .uploadStatus(UploadStatus.NOT_STARTED)
                         .build());
-        return ResponseEntity.ok(FileCreateResponse
+        return FileCreateResponse
                         .builder()
                         .uploadId(fileUploadEntity.getId())
-                        .build());
+                        .build();
     }
 
-    public ResponseEntity<StreamingResponseBody> downloadFile(Long fileId, User user) throws IOException {
+    public StreamingResponseBody downloadFile(Long fileId, User user) throws IOException, ApiException {
         // validations
         FileEntity file = fileRepository.findFileEntityById(fileId);
-        if(file == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
+        fileExistenceRequiredValidation(file);
+
         PermissionType permission = getFilePermissionForUser(file, user);
-        if(permission == null)
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+        fileReadPermissionRequiredValidation(permission);
 
         // download file from s3
         String fileName = file.getId().toString();
@@ -111,8 +118,7 @@ public class FileService {
         tempStorageService.downloadStreamToFile(inputStream, fileName);
         inputStream.close();
 
-        return ResponseEntity.ok(
-                (OutputStream outputStream) -> {
+        return (OutputStream outputStream) -> {
                     // read the downloaded file and stream it as response body
                     BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(tempStorageService.getPath(fileName)));
@@ -123,51 +129,38 @@ public class FileService {
                     bufferedOutputStream.flush();
                     bufferedInputStream.close();
                     tempStorageService.deleteFileIfExists(fileName);
-                });
+                };
     }
 
-    public ResponseEntity<com.akshit.api.model.File> modifyFile(FileUpdateRequest fileUpdateRequest, Long fileId, User user){
+    public com.akshit.api.model.File modifyFile(
+            FileUpdateRequest fileUpdateRequest,
+            Long fileId, User user) throws ApiException
+    {
         FileEntity file = fileRepository.findFileEntityById(fileId);
-        if(file == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
+        fileExistenceRequiredValidation(file);
+
         PermissionType permission = getFilePermissionForUser(file, user);
-        if(permission != PermissionType.WRITE)
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+        fileWritePermissionRequiredValidation(permission);
 
         String newName = fileUpdateRequest.getName();
-        String newExtension = fileUpdateRequest.getExtension();
-        boolean nameChange = newName != null && !newName.equals(file.getName());
-        boolean extensionChange = newExtension != null && !newExtension.equals(file.getExtension());
-
-        if(!nameChange && !extensionChange)
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
-        if(nameChange)
+        if(newName != null)
             file.setName(newName);
-        if(extensionChange)
+
+        String newExtension = fileUpdateRequest.getExtension();
+        if(newExtension != null)
             file.setExtension(newExtension);
+
         file = fileRepository.save(file);
-        return ResponseEntity.ok(com.akshit.api.model.File.fromEntity(file));
+        return com.akshit.api.model.File.fromEntity(file);
     }
 
-    public ResponseEntity<Void> deleteFile(Long fileId, User user){
+    public void deleteFile(Long fileId, User user) throws ApiException {
         FileEntity file = fileRepository.findFileEntityById(fileId);
-        if(file == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
+        fileExistenceRequiredValidation(file);
+
         PermissionType permission = getFilePermissionForUser(file, user);
-        if(permission != PermissionType.WRITE)
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+        fileWritePermissionRequiredValidation(permission);
 
         deleteFile(file.getId());
-        return ResponseEntity.ok().build();
     }
 }

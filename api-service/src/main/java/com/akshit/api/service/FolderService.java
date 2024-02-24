@@ -1,6 +1,7 @@
 package com.akshit.api.service;
 
 import com.akshit.api.entity.*;
+import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.*;
 import com.akshit.api.repo.FileRepository;
 import com.akshit.api.repo.FolderRepository;
@@ -123,47 +124,49 @@ public class FolderService {
         return createUserRootFolderMapping(user);
     }
 
-    public ResponseEntity<FolderContentsResponse> getFolderContents(Long folderId, User user){
-        FolderEntity folder = folderRepository.findFolderEntityById(folderId);
+    public void folderExistenceRequiredValidation(FolderEntity folder) throws ApiException {
         if(folder == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
-        PermissionType permission = getFolderPermissionForUser(folder, user);
+            throw new ApiException("Folder not found", HttpStatus.NOT_FOUND);
+    }
+
+    public void folderReadPermissionRequiredValidation(PermissionType permission) throws ApiException {
         if(permission == null)
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+            throw new ApiException("User doesn't have read permission for this folder", HttpStatus.FORBIDDEN);
+    }
+    
+    public void folderWritePermissionRequiredValidation(PermissionType permission) throws ApiException {
+        if(permission != PermissionType.WRITE)
+            throw new ApiException("User doesn't have write permission for this folder", HttpStatus.FORBIDDEN);
+    }
+
+    public FolderContentsResponse getFolderContents(Long folderId, User user) throws ApiException {
+        FolderEntity folder = folderRepository.findFolderEntityById(folderId);
+        folderExistenceRequiredValidation(folder);
+
+        PermissionType permission = getFolderPermissionForUser(folder, user);
+        folderReadPermissionRequiredValidation(permission);
 
         List<FolderEntity> folders = getChildFolders(folder);
         List<FileEntity> files = getChildFiles(folder);
-        return ResponseEntity.ok(
-                FolderContentsResponse
-                        .builder()
-                        .folders(folders.stream().map(Folder::fromEntity).toList())
-                        .files(files.stream().map(File::fromEntity).toList())
-                        .build()
-        );
+        return FolderContentsResponse
+                .builder()
+                .folders(folders.stream().map(Folder::fromEntity).toList())
+                .files(files.stream().map(File::fromEntity).toList())
+                .build();
     }
 
-    public ResponseEntity<Folder> createFolder(FolderCreateRequest folderCreateRequest, User user){
+    public Folder createFolder(FolderCreateRequest folderCreateRequest, User user) throws ApiException {
         FolderEntity parentFolder = folderRepository.findFolderEntityById(folderCreateRequest.getParentFolderId());
-        if(parentFolder == null)
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+        folderExistenceRequiredValidation(parentFolder);
+        
         PermissionType permission = getFolderPermissionForUser(parentFolder, user);
-        if((permission == null) || (permission == PermissionType.READ))
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+        folderWritePermissionRequiredValidation(permission);
+        
         FolderEntity folder = folderRepository.findByFolderNameAndParentFolderId(
                 folderCreateRequest.getFolderName(),
                 parentFolder.getId());
         if(folder != null)
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+            throw new ApiException("Folder with the same name already exists", HttpStatus.BAD_REQUEST);
 
         folder = folderRepository.save(FolderEntity
                     .builder()
@@ -171,52 +174,35 @@ public class FolderService {
                     .parentFolderId(parentFolder.getId())
                     .createdAt(new Date().getTime())
                     .build());
-        return ResponseEntity.ok(Folder.fromEntity(folder));
+        return Folder.fromEntity(folder);
     }
 
-    public ResponseEntity<Folder> updateFolder(Long folderId, FolderUpdateRequest folderUpdateRequest, User user){
+    public Folder updateFolder(Long folderId, FolderUpdateRequest folderUpdateRequest, User user) throws ApiException {
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
-        if(folder == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
-        if(folder.getParentFolderId() == null)
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
-        PermissionType permission = getFolderPermissionForUser(folder, user);
-        if((permission == null) || (permission == PermissionType.READ))
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
-        String newFolderName = folderUpdateRequest.getFolderName();
-        if((newFolderName == null) || (newFolderName.equals(folder.getFolderName())))
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+        folderExistenceRequiredValidation(folder);
 
-        folder.setFolderName(newFolderName);
+        if(folder.getParentFolderId() == null)
+            throw new ApiException("Cannot modify root folder", HttpStatus.BAD_REQUEST);
+
+        PermissionType permission = getFolderPermissionForUser(folder, user);
+        folderWritePermissionRequiredValidation(permission);
+
+        folder.setFolderName(folderUpdateRequest.getFolderName());
         folder = folderRepository.save(folder);
-        return ResponseEntity.ok(Folder.fromEntity(folder));
+        return Folder.fromEntity(folder);
     }
 
-    public ResponseEntity<Void> deleteFolder(Long folderId, User user){
+    public void deleteFolder(Long folderId, User user) throws ApiException {
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
-        if(folder == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
+        folderExistenceRequiredValidation(folder);
+
         if(folder.getParentFolderId() == null)
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+            throw new ApiException("Cannot delete root folder", HttpStatus.BAD_REQUEST);
+
         PermissionType permission = getFolderPermissionForUser(folder, user);
-        if((permission == null) || (permission == PermissionType.READ))
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+        folderWritePermissionRequiredValidation(permission);
+
         deleteFolderTree(folder);
-        return ResponseEntity.ok().build();
     }
 
     public Folder getRootFolderForUser(User user){

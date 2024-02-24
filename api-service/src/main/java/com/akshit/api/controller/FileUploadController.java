@@ -1,5 +1,6 @@
 package com.akshit.api.controller;
 
+import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.UploadStatusResponse;
 import com.akshit.api.model.User;
 import com.akshit.api.service.FileUploadService;
@@ -21,12 +22,19 @@ public class FileUploadController {
     private FileUploadService fileUploadService;
 
     @GetMapping("{uploadId}")
-    public ResponseEntity<UploadStatusResponse> getUploadStatus(@PathVariable Long uploadId, @AuthenticationPrincipal User user){
+    public UploadStatusResponse getUploadStatus(
+            @PathVariable Long uploadId,
+            @AuthenticationPrincipal User user) throws ApiException
+    {
         return fileUploadService.getUploadStatus(uploadId, user);
     }
 
     @PutMapping("{uploadId}")
-    public ResponseEntity<Void> upload(HttpServletRequest request, @PathVariable Long uploadId, @AuthenticationPrincipal User user) throws IOException {
-        return fileUploadService.upload(request, uploadId, user);
+    public void upload(
+            HttpServletRequest request,
+            @PathVariable Long uploadId,
+            @AuthenticationPrincipal User user) throws IOException, ApiException
+    {
+        fileUploadService.upload(request, uploadId, user);
     }
 }

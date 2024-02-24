@@ -1,5 +1,6 @@
 package com.akshit.api.controller;
 
+import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.*;
 import com.akshit.api.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,22 +19,35 @@ public class FileController {
     private FileService fileService;
 
     @PostMapping("")
-    public ResponseEntity<FileCreateResponse> createFile(@RequestBody FileCreateRequest fileCreateRequest, @AuthenticationPrincipal User user){
+    public FileCreateResponse createFile(
+            @RequestBody FileCreateRequest fileCreateRequest,
+            @AuthenticationPrincipal User user) throws ApiException
+    {
         return fileService.createFile(fileCreateRequest, user);
     }
 
     @GetMapping("{fileId}/download")
-    public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable Long fileId, @AuthenticationPrincipal User user) throws IOException {
+    public StreamingResponseBody downloadFile(
+            @PathVariable Long fileId,
+            @AuthenticationPrincipal User user) throws IOException, ApiException
+    {
         return fileService.downloadFile(fileId, user);
     }
 
     @PatchMapping("{fileId}")
-    public ResponseEntity<File> modifyFile(@RequestBody FileUpdateRequest fileUpdateRequest, @PathVariable Long fileId, @AuthenticationPrincipal User user){
+    public File modifyFile(
+            @RequestBody FileUpdateRequest fileUpdateRequest,
+            @PathVariable Long fileId,
+            @AuthenticationPrincipal User user) throws ApiException
+    {
         return fileService.modifyFile(fileUpdateRequest, fileId, user);
     }
 
     @DeleteMapping("{fileId}")
-    public ResponseEntity<Void> deleteFile(@PathVariable Long fileId, @AuthenticationPrincipal User user){
-        return fileService.deleteFile(fileId, user);
+    public void deleteFile(
+            @PathVariable Long fileId,
+            @AuthenticationPrincipal User user) throws ApiException
+    {
+        fileService.deleteFile(fileId, user);
     }
 }

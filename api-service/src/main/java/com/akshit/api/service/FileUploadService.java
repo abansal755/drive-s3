@@ -3,6 +3,7 @@ package com.akshit.api.service;
 import com.akshit.api.entity.FileEntity;
 import com.akshit.api.entity.FileUploadEntity;
 import com.akshit.api.entity.UploadStatus;
+import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.UploadStatusResponse;
 import com.akshit.api.model.User;
 import com.akshit.api.repo.FileRepository;
@@ -38,38 +39,35 @@ public class FileUploadService {
     @Autowired
     private TempStorageService tempStorageService;
 
-    public ResponseEntity<UploadStatusResponse> getUploadStatus(Long uploadId,User user){
-        FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
+    public void fileUploadExistenceRequiredValidation(FileUploadEntity fileUpload) throws ApiException {
         if(fileUpload == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
-        if(!fileUpload.getUserId().equals(user.getId()))
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
-
-        return ResponseEntity.ok(UploadStatusResponse
-                        .builder()
-                        .uploadStatus(fileUpload.getUploadStatus())
-                        .build());
+            throw new ApiException("Upload ID not found", HttpStatus.NOT_FOUND);
     }
 
-    public ResponseEntity<Void> upload(HttpServletRequest request, Long uploadId, User user) throws IOException {
+    public void fileUploadMatchUserValidation(FileUploadEntity fileUpload, User user) throws ApiException {
+        if(!fileUpload.getUserId().equals(user.getId()))
+            throw new ApiException("User doesn't have access to this upload ID", HttpStatus.FORBIDDEN);
+    }
+
+    public UploadStatusResponse getUploadStatus(Long uploadId,User user) throws ApiException {
+        FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
+        fileUploadExistenceRequiredValidation(fileUpload);
+        fileUploadMatchUserValidation(fileUpload, user);
+
+        return UploadStatusResponse
+                        .builder()
+                        .uploadStatus(fileUpload.getUploadStatus())
+                        .build();
+    }
+
+    public void upload(HttpServletRequest request, Long uploadId, User user) throws IOException, ApiException {
         // validations
         FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
-        if(fileUpload == null)
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
-        if(!fileUpload.getUserId().equals(user.getId()))
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+        fileUploadExistenceRequiredValidation(fileUpload);
+        fileUploadMatchUserValidation(fileUpload, user);
+
         if(fileUpload.getUploadStatus() != UploadStatus.NOT_STARTED)
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .build();
+            throw new ApiException("Upload has already been started or completed", HttpStatus.FORBIDDEN);
 
         // set status to uploading
         fileUpload.setUploadStatus(UploadStatus.UPLOADING);
@@ -91,7 +89,5 @@ public class FileUploadService {
         file.setS3BucketName(S3_BUCKET_NAME);
         file.setS3ObjectKey(fileName);
         fileRepository.save(file);
-
-        return ResponseEntity.ok().build();
     }
 }

@@ -1,6 +1,7 @@
 package com.akshit.api.controller;
 
 import com.akshit.api.entity.FolderEntity;
+import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.*;
 import com.akshit.api.service.FolderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,26 +22,32 @@ public class FolderController {
     }
 
     @GetMapping("{folderId}")
-    public ResponseEntity<FolderContentsResponse> getFolderContents(@PathVariable Long folderId, @AuthenticationPrincipal User user){
+    public FolderContentsResponse getFolderContents(
+            @PathVariable Long folderId,
+            @AuthenticationPrincipal User user) throws ApiException
+    {
         return folderService.getFolderContents(folderId, user);
     }
 
     @PostMapping("")
-    public ResponseEntity<Folder> createFolder(@RequestBody FolderCreateRequest folderCreateRequest, @AuthenticationPrincipal User user){
+    public Folder createFolder(
+            @RequestBody FolderCreateRequest folderCreateRequest,
+            @AuthenticationPrincipal User user) throws ApiException
+    {
         return folderService.createFolder(folderCreateRequest, user);
     }
 
     @PatchMapping("{folderId}")
-    public ResponseEntity<Folder> updateFolder(
+    public Folder updateFolder(
             @PathVariable Long folderId,
             @RequestBody FolderUpdateRequest folderUpdateRequest,
-            @AuthenticationPrincipal User user)
+            @AuthenticationPrincipal User user) throws ApiException
     {
         return folderService.updateFolder(folderId, folderUpdateRequest, user);
     }
 
     @DeleteMapping("{folderId}")
-    public ResponseEntity<Void> deleteFolder(@PathVariable Long folderId, @AuthenticationPrincipal User user){
-        return folderService.deleteFolder(folderId, user);
+    public void deleteFolder(@PathVariable Long folderId, @AuthenticationPrincipal User user) throws ApiException {
+        folderService.deleteFolder(folderId, user);
     }
 }

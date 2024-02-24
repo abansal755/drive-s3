@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+
 @Data
 @Getter
 @Setter
@@ -14,5 +16,5 @@ import org.springframework.http.HttpStatus;
 public class ExceptionResponse {
     private HttpStatus status;
     private String message;
-    private StackTraceElement[] stackTrace;
+    private List<String> stackTrace;
 }

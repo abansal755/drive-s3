@@ -4,6 +4,7 @@ import com.akshit.api.entity.FolderEntity;
 import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.*;
 import com.akshit.api.service.FolderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +32,7 @@ public class FolderController {
 
     @PostMapping("")
     public Folder createFolder(
-            @RequestBody FolderCreateRequest folderCreateRequest,
+            @Valid @RequestBody FolderCreateRequest folderCreateRequest,
             @AuthenticationPrincipal User user) throws ApiException
     {
         return folderService.createFolder(folderCreateRequest, user);
@@ -40,7 +41,7 @@ public class FolderController {
     @PatchMapping("{folderId}")
     public Folder updateFolder(
             @PathVariable Long folderId,
-            @RequestBody FolderUpdateRequest folderUpdateRequest,
+            @Valid @RequestBody FolderUpdateRequest folderUpdateRequest,
             @AuthenticationPrincipal User user) throws ApiException
     {
         return folderService.updateFolder(folderId, folderUpdateRequest, user);

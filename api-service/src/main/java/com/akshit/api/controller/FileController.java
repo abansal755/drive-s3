@@ -3,6 +3,7 @@ package com.akshit.api.controller;
 import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.*;
 import com.akshit.api.service.FileService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,7 +21,7 @@ public class FileController {
 
     @PostMapping("")
     public FileCreateResponse createFile(
-            @RequestBody FileCreateRequest fileCreateRequest,
+            @Valid @RequestBody FileCreateRequest fileCreateRequest,
             @AuthenticationPrincipal User user) throws ApiException
     {
         return fileService.createFile(fileCreateRequest, user);

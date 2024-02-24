@@ -1,4 +1,4 @@
-package com.akshit.api.filter;
+package com.akshit.api.config;
 
 import com.akshit.api.model.User;
 import com.akshit.api.repo.UserRootFolderMappingRepository;

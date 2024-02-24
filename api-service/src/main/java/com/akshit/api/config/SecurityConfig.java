@@ -1,7 +1,5 @@
 package com.akshit.api.config;
 
-import com.akshit.api.filter.AuthFilter;
-import com.akshit.api.filter.DelegatedAuthenticationEntryPoint;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

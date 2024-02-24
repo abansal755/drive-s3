@@ -1,4 +1,4 @@
-package com.akshit.api.filter;
+package com.akshit.api.config;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

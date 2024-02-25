@@ -10,11 +10,15 @@ import com.akshit.api.repo.UserRootFolderMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayDeque;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 public class FolderService {
@@ -67,7 +71,7 @@ public class FolderService {
         return userRootFolderMapping;
     }
 
-    private boolean checkIfFolderIsOwnedByUser(FolderEntity folder, User user){
+    public boolean checkIfFolderIsOwnedByUser(FolderEntity folder, User user){
         FolderEntity rootFolder = getRootFolder(folder);
         UserRootFolderMappingEntity mapping = userRootFolderMappingRepository.findByFolderId(rootFolder.getId());
         return (mapping.getUserId().equals(user.getId()));

@@ -47,7 +47,7 @@ public class FileService {
     @Autowired
     private TempStorageService tempStorageService;
 
-    private PermissionType getFilePermissionForUser(FileEntity file, User user){
+    public PermissionType getFilePermissionForUser(FileEntity file, User user){
         PermissionEntity permission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(file.getId(), ResourceType.FILE, user.getId());
         if(permission != null)
             return permission.getPermissionType();
@@ -61,8 +61,13 @@ public class FileService {
         s3Service.deleteS3Object(fileId.toString());
     }
 
-    public void fileExistenceRequiredValidation(FileEntity folder) throws ApiException {
-        if(folder == null)
+    public boolean checkIfFileIsOwnedByUser(FileEntity file, User user){
+        FolderEntity parentFolder = folderRepository.findFolderEntityById(file.getParentFolderId());
+        return folderService.checkIfFolderIsOwnedByUser(parentFolder, user);
+    }
+
+    public void fileExistenceRequiredValidation(FileEntity file) throws ApiException {
+        if(file == null)
             throw new ApiException("File not found", HttpStatus.NOT_FOUND);
     }
 

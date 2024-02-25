@@ -9,15 +9,10 @@ import com.akshit.api.repo.PermissionRepository;
 import com.akshit.api.repo.UserRootFolderMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.ArrayDeque;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 @Service
@@ -44,14 +39,34 @@ public class FolderService {
         return folderRepository.findFolderEntityById(parentFolderId);
     }
 
-    private FolderEntity getRootFolder(FolderEntity folder){
+    private void forEachAncestor(FolderEntity folder, Function<FolderEntity, Boolean> function){
         FolderEntity currentFolder = folder;
         while(true){
+            if(!function.apply(currentFolder)) break;
             FolderEntity parentFolder = getParentFolder(currentFolder);
             if(parentFolder == null) break;
             currentFolder = parentFolder;
         }
-        return currentFolder;
+    }
+
+    private void breadthFirstSearch(FolderEntity folder, Function<FolderEntity, Boolean> function){
+        ArrayDeque<FolderEntity> deque = new ArrayDeque<>();
+        deque.addLast(folder);
+        while(!deque.isEmpty()){
+            FolderEntity front = deque.poll();
+            if(!function.apply(front)) break;
+            List<FolderEntity> children = getChildFolders(front);
+            children.forEach(deque::addLast);
+        }
+    }
+
+    private FolderEntity getRootFolder(FolderEntity folder){
+        AtomicReference<FolderEntity> root = new AtomicReference<>(null);
+        forEachAncestor(folder, (currentFolder) -> {
+            root.set(currentFolder);
+            return true;
+        });
+        return root.get();
     }
 
     private UserRootFolderMappingEntity createUserRootFolderMapping(User user){
@@ -78,18 +93,24 @@ public class FolderService {
     }
 
     public PermissionType getFolderPermissionForUser(FolderEntity folder, User user){
-        FolderEntity currentFolder = folder;
-        while(true){
+        PermissionType[] permissionType = { null };
+        FolderEntity[] rootFolder = { null };
+        forEachAncestor(folder, (currentFolder) -> {
+            rootFolder[0] = currentFolder;
             PermissionEntity permission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(
-                    folder.getId(),
+                    currentFolder.getId(),
                     ResourceType.FOLDER,
-                    user.getId());
-            if(permission != null) return permission.getPermissionType();
-            FolderEntity parentFolder = getParentFolder(currentFolder);
-            if(parentFolder == null) break;
-            currentFolder = parentFolder;
-        }
-        if(checkIfFolderIsOwnedByUser(currentFolder, user)) return PermissionType.WRITE;
+                    user.getId()
+            );
+            if(permission != null){
+                permissionType[0] = permission.getPermissionType();
+                return false;
+            }
+            return true;
+        });
+        if(permissionType[0] != null)
+            return permissionType[0];
+        if(checkIfFolderIsOwnedByUser(rootFolder[0], user)) return PermissionType.WRITE;
         return null;
     }
 
@@ -107,19 +128,12 @@ public class FolderService {
     }
 
     private void deleteFolderTree(FolderEntity folder){
-        ArrayDeque<FolderEntity> deque = new ArrayDeque<>();
-        deque.addLast(folder);
-        while(!deque.isEmpty()){
-            FolderEntity head = deque.poll();
-            deleteFolder(head);
-
-            List<FolderEntity> children = getChildFolders(head);
-            for(FolderEntity child:children)
-                deque.addLast(child);
-            List<FileEntity> files = getChildFiles(folder);
-            for(FileEntity file:files)
-                fileService.deleteFile(file.getId());
-        }
+        breadthFirstSearch(folder, (currentFolder) -> {
+            deleteFolder(currentFolder);
+            List<FileEntity> files = getChildFiles(currentFolder);
+            files.forEach((file) -> fileService.deleteFile(file.getId()));
+            return true;
+        });
     }
 
     public UserRootFolderMappingEntity createUserRootFolderMappingIfNotExists(User user){

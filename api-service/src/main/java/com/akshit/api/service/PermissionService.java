@@ -70,6 +70,13 @@ public class PermissionService {
             PermissionType existingPermission = fileService.getFilePermissionForUser(file, otherUser);
             resourcePermissionNotExistsValidation(permissionType, existingPermission);
         }
+
+        PermissionEntity existingPermission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(resourceId, resourceType, userId);
+        if(existingPermission != null){
+            existingPermission.setPermissionType(permissionType);
+            permissionRepository.save(existingPermission);
+            return;
+        }
         permissionRepository.save(PermissionEntity
                 .builder()
                 .userId(userId)

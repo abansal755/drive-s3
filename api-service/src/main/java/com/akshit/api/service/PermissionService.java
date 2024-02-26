@@ -38,6 +38,11 @@ public class PermissionService {
             throw new ApiException("This user already has write permission to this resource", HttpStatus.BAD_REQUEST);
     }
 
+    private void permissionExistenceRequiredValidation(PermissionEntity permission) throws ApiException {
+        if(permission == null)
+            throw new ApiException("Permission not found", HttpStatus.NOT_FOUND);
+    }
+
     public void createPermission(PermissionCreateRequest permissionCreateRequest, User user) throws ApiException {
         PermissionType permissionType = permissionCreateRequest.getPermissionType();
         ResourceType resourceType = permissionCreateRequest.getResourceType();
@@ -73,5 +78,26 @@ public class PermissionService {
                 .resourceId(resourceId)
                 .createdAt(new Date().getTime())
                 .build());
+    }
+
+    public void deletePermission(Long permissionId, User user) throws ApiException {
+        PermissionEntity permission = permissionRepository.findPermissionEntityById(permissionId);
+        permissionExistenceRequiredValidation(permission);
+
+        ResourceType resourceType = permission.getResourceType();
+        Long resourceId = permission.getResourceId();
+        boolean isOwner = false;
+        if(resourceType == ResourceType.FOLDER){
+            FolderEntity folder = folderRepository.findFolderEntityById(resourceId);
+            isOwner = folderService.checkIfFolderIsOwnedByUser(folder, user);
+        }
+        else if(resourceType == ResourceType.FILE){
+            FileEntity file = fileRepository.findFileEntityById(resourceId);
+            isOwner = fileService.checkIfFileIsOwnedByUser(file, user);
+        }
+        if(!isOwner)
+            throw new ApiException("User is not allowed to delete this permission", HttpStatus.FORBIDDEN);
+
+        permissionRepository.deleteById(permissionId);
     }
 }

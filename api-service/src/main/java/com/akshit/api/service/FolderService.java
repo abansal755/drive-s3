@@ -61,12 +61,12 @@ public class FolderService {
     }
 
     private FolderEntity getRootFolder(FolderEntity folder){
-        AtomicReference<FolderEntity> root = new AtomicReference<>(null);
+        FolderEntity[] root = { null };
         forEachAncestor(folder, (currentFolder) -> {
-            root.set(currentFolder);
+            root[0] = currentFolder;
             return true;
         });
-        return root.get();
+        return root[0];
     }
 
     private UserRootFolderMappingEntity createUserRootFolderMapping(User user){

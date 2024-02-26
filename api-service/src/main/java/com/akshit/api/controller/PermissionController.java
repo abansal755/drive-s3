@@ -23,4 +23,12 @@ public class PermissionController {
     {
         permissionService.createPermission(permissionCreateRequest, user);
     }
+
+    @DeleteMapping("{permissionId}")
+    public void deletePermission(
+            @PathVariable Long permissionId,
+            @AuthenticationPrincipal User user) throws ApiException
+    {
+        permissionService.deletePermission(permissionId, user);
+    }
 }

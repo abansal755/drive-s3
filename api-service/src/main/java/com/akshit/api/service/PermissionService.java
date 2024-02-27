@@ -10,6 +10,7 @@ import com.akshit.api.repo.PermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -43,6 +44,7 @@ public class PermissionService {
             throw new ApiException("Permission not found", HttpStatus.NOT_FOUND);
     }
 
+    @Transactional
     public void createPermission(PermissionCreateRequest permissionCreateRequest, User user) throws ApiException {
         PermissionType permissionType = permissionCreateRequest.getPermissionType();
         ResourceType resourceType = permissionCreateRequest.getResourceType();
@@ -87,6 +89,7 @@ public class PermissionService {
                 .build());
     }
 
+    @Transactional
     public void deletePermission(Long permissionId, User user) throws ApiException {
         PermissionEntity permission = permissionRepository.findPermissionEntityById(permissionId);
         permissionExistenceRequiredValidation(permission);

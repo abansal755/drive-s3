@@ -10,6 +10,8 @@ import com.akshit.api.repo.UserRootFolderMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,13 +35,15 @@ public class FolderService {
     @Autowired
     private FileService fileService;
 
-    private FolderEntity getParentFolder(FolderEntity folder){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public FolderEntity getParentFolder(FolderEntity folder){
         Long parentFolderId = folder.getParentFolderId();
         if(parentFolderId == null) return null;
         return folderRepository.findFolderEntityById(parentFolderId);
     }
 
-    private void forEachAncestor(FolderEntity folder, Function<FolderEntity, Boolean> function){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void forEachAncestor(FolderEntity folder, Function<FolderEntity, Boolean> function){
         FolderEntity currentFolder = folder;
         while(true){
             if(!function.apply(currentFolder)) break;
@@ -49,7 +53,8 @@ public class FolderService {
         }
     }
 
-    private void breadthFirstSearch(FolderEntity folder, Function<FolderEntity, Boolean> function){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void breadthFirstSearch(FolderEntity folder, Function<FolderEntity, Boolean> function){
         ArrayDeque<FolderEntity> deque = new ArrayDeque<>();
         deque.addLast(folder);
         while(!deque.isEmpty()){
@@ -60,7 +65,8 @@ public class FolderService {
         }
     }
 
-    private FolderEntity getRootFolder(FolderEntity folder){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public FolderEntity getRootFolder(FolderEntity folder){
         FolderEntity[] root = { null };
         forEachAncestor(folder, (currentFolder) -> {
             root[0] = currentFolder;
@@ -69,7 +75,8 @@ public class FolderService {
         return root[0];
     }
 
-    private UserRootFolderMappingEntity createUserRootFolderMapping(User user){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public UserRootFolderMappingEntity createUserRootFolderMapping(User user){
         FolderEntity rootFolder = folderRepository.save(
                 FolderEntity
                         .builder()
@@ -86,12 +93,14 @@ public class FolderService {
         return userRootFolderMapping;
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     public boolean checkIfFolderIsOwnedByUser(FolderEntity folder, User user){
         FolderEntity rootFolder = getRootFolder(folder);
         UserRootFolderMappingEntity mapping = userRootFolderMappingRepository.findByFolderId(rootFolder.getId());
         return (mapping.getUserId().equals(user.getId()));
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     public PermissionType getFolderPermissionForUser(FolderEntity folder, User user){
         PermissionType[] permissionType = { null };
         FolderEntity[] rootFolder = { null };
@@ -114,32 +123,30 @@ public class FolderService {
         return null;
     }
 
-    private List<FolderEntity> getChildFolders(FolderEntity folder){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public List<FolderEntity> getChildFolders(FolderEntity folder){
         return folderRepository.findAllByParentFolderId(folder.getId());
     }
 
-    private List<FileEntity> getChildFiles(FolderEntity folder){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public List<FileEntity> getChildFiles(FolderEntity folder){
         return fileRepository.findAllByParentFolderId(folder.getId());
     }
 
-    private void deleteFolder(FolderEntity folder){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void deleteFolder(FolderEntity folder){
         permissionRepository.deleteAllByResourceIdAndResourceType(folder.getId(), ResourceType.FOLDER);
         folderRepository.deleteById(folder.getId());
     }
 
-    private void deleteFolderTree(FolderEntity folder){
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void deleteFolderTree(FolderEntity folder){
         breadthFirstSearch(folder, (currentFolder) -> {
             deleteFolder(currentFolder);
             List<FileEntity> files = getChildFiles(currentFolder);
             files.forEach((file) -> fileService.deleteFile(file.getId()));
             return true;
         });
-    }
-
-    public UserRootFolderMappingEntity createUserRootFolderMappingIfNotExists(User user){
-        UserRootFolderMappingEntity userRootFolderMapping = userRootFolderMappingRepository.findByUserId(user.getId());
-        if(userRootFolderMapping != null) return userRootFolderMapping;
-        return createUserRootFolderMapping(user);
     }
 
     public void folderExistenceRequiredValidation(FolderEntity folder) throws ApiException {
@@ -157,6 +164,14 @@ public class FolderService {
             throw new ApiException("User doesn't have write permission for this folder", HttpStatus.FORBIDDEN);
     }
 
+    @Transactional
+    public UserRootFolderMappingEntity createUserRootFolderMappingIfNotExists(User user){
+        UserRootFolderMappingEntity userRootFolderMapping = userRootFolderMappingRepository.findByUserId(user.getId());
+        if(userRootFolderMapping != null) return userRootFolderMapping;
+        return createUserRootFolderMapping(user);
+    }
+
+    @Transactional
     public FolderContentsResponse getFolderContents(Long folderId, User user) throws ApiException {
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
         folderExistenceRequiredValidation(folder);
@@ -173,6 +188,7 @@ public class FolderService {
                 .build();
     }
 
+    @Transactional
     public Folder createFolder(FolderCreateRequest folderCreateRequest, User user) throws ApiException {
         FolderEntity parentFolder = folderRepository.findFolderEntityById(folderCreateRequest.getParentFolderId());
         folderExistenceRequiredValidation(parentFolder);
@@ -195,6 +211,7 @@ public class FolderService {
         return Folder.fromEntity(folder);
     }
 
+    @Transactional
     public Folder updateFolder(Long folderId, FolderUpdateRequest folderUpdateRequest, User user) throws ApiException {
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
         folderExistenceRequiredValidation(folder);
@@ -210,6 +227,7 @@ public class FolderService {
         return Folder.fromEntity(folder);
     }
 
+    @Transactional
     public void deleteFolder(Long folderId, User user) throws ApiException {
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
         folderExistenceRequiredValidation(folder);
@@ -223,6 +241,7 @@ public class FolderService {
         deleteFolderTree(folder);
     }
 
+    @Transactional
     public Folder getRootFolderForUser(User user){
         UserRootFolderMappingEntity mapping = userRootFolderMappingRepository.findByUserId(user.getId());
         FolderEntity rootFolder = folderRepository.findFolderEntityById(mapping.getFolderId());

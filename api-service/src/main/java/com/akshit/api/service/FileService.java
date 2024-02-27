@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -47,6 +49,7 @@ public class FileService {
     @Autowired
     private TempStorageService tempStorageService;
 
+    @Transactional(propagation = Propagation.MANDATORY)
     public PermissionType getFilePermissionForUser(FileEntity file, User user){
         PermissionEntity permission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(file.getId(), ResourceType.FILE, user.getId());
         if(permission != null)
@@ -55,12 +58,14 @@ public class FileService {
         return folderService.getFolderPermissionForUser(parentFolder, user);
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     public void deleteFile(Long fileId){
         fileRepository.deleteById(fileId);
         permissionRepository.deleteAllByResourceIdAndResourceType(fileId, ResourceType.FILE);
         s3Service.deleteS3Object(fileId.toString());
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     public boolean checkIfFileIsOwnedByUser(FileEntity file, User user){
         FolderEntity parentFolder = folderRepository.findFolderEntityById(file.getParentFolderId());
         return folderService.checkIfFolderIsOwnedByUser(parentFolder, user);
@@ -81,6 +86,7 @@ public class FileService {
             throw new ApiException("User doesn't have write permission for this file", HttpStatus.FORBIDDEN);
     }
 
+    @Transactional
     public FileCreateResponse createFile(FileCreateRequest fileCreateRequest, User user) throws ApiException {
         FolderEntity parentFolder = folderRepository.findFolderEntityById(fileCreateRequest.getParentFolderId());
         if(parentFolder == null)
@@ -109,6 +115,7 @@ public class FileService {
                         .build();
     }
 
+    @Transactional
     public StreamingResponseBody downloadFile(Long fileId, User user) throws IOException, ApiException {
         // validations
         FileEntity file = fileRepository.findFileEntityById(fileId);
@@ -137,6 +144,7 @@ public class FileService {
                 };
     }
 
+    @Transactional
     public com.akshit.api.model.File modifyFile(
             FileUpdateRequest fileUpdateRequest,
             Long fileId, User user) throws ApiException
@@ -159,6 +167,7 @@ public class FileService {
         return com.akshit.api.model.File.fromEntity(file);
     }
 
+    @Transactional
     public void deleteFile(Long fileId, User user) throws ApiException {
         FileEntity file = fileRepository.findFileEntityById(fileId);
         fileExistenceRequiredValidation(file);

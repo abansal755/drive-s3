@@ -123,12 +123,10 @@ public class FolderService {
         return null;
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
     public List<FolderEntity> getChildFolders(FolderEntity folder){
         return folderRepository.findAllByParentFolderId(folder.getId());
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
     public List<FileEntity> getChildFiles(FolderEntity folder){
         return fileRepository.findAllByParentFolderId(folder.getId());
     }

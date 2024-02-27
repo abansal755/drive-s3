@@ -71,23 +71,23 @@ public class FileService {
         return folderService.checkIfFolderIsOwnedByUser(parentFolder, user);
     }
 
-    public void fileExistenceRequiredValidation(FileEntity file) throws ApiException {
+    public void fileExistenceRequiredValidation(FileEntity file){
         if(file == null)
             throw new ApiException("File not found", HttpStatus.NOT_FOUND);
     }
 
-    public void fileReadPermissionRequiredValidation(PermissionType permission) throws ApiException {
+    public void fileReadPermissionRequiredValidation(PermissionType permission){
         if(permission == null)
             throw new ApiException("User doesn't have read permission for this file", HttpStatus.FORBIDDEN);
     }
 
-    public void fileWritePermissionRequiredValidation(PermissionType permission) throws ApiException {
+    public void fileWritePermissionRequiredValidation(PermissionType permission){
         if(permission != PermissionType.WRITE)
             throw new ApiException("User doesn't have write permission for this file", HttpStatus.FORBIDDEN);
     }
 
     @Transactional
-    public FileCreateResponse createFile(FileCreateRequest fileCreateRequest, User user) throws ApiException {
+    public FileCreateResponse createFile(FileCreateRequest fileCreateRequest, User user){
         FolderEntity parentFolder = folderRepository.findFolderEntityById(fileCreateRequest.getParentFolderId());
         if(parentFolder == null)
             throw new ApiException("Parent folder not found", HttpStatus.BAD_REQUEST);
@@ -116,7 +116,7 @@ public class FileService {
     }
 
     @Transactional
-    public StreamingResponseBody downloadFile(Long fileId, User user) throws IOException, ApiException {
+    public StreamingResponseBody downloadFile(Long fileId, User user) throws IOException {
         // validations
         FileEntity file = fileRepository.findFileEntityById(fileId);
         fileExistenceRequiredValidation(file);
@@ -147,7 +147,7 @@ public class FileService {
     @Transactional
     public com.akshit.api.model.File modifyFile(
             FileUpdateRequest fileUpdateRequest,
-            Long fileId, User user) throws ApiException
+            Long fileId, User user)
     {
         FileEntity file = fileRepository.findFileEntityById(fileId);
         fileExistenceRequiredValidation(file);
@@ -168,7 +168,7 @@ public class FileService {
     }
 
     @Transactional
-    public void deleteFile(Long fileId, User user) throws ApiException {
+    public void deleteFile(Long fileId, User user){
         FileEntity file = fileRepository.findFileEntityById(fileId);
         fileExistenceRequiredValidation(file);
 

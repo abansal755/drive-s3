@@ -149,17 +149,17 @@ public class FolderService {
         });
     }
 
-    public void folderExistenceRequiredValidation(FolderEntity folder) throws ApiException {
+    public void folderExistenceRequiredValidation(FolderEntity folder){
         if(folder == null)
             throw new ApiException("Folder not found", HttpStatus.NOT_FOUND);
     }
 
-    public void folderReadPermissionRequiredValidation(PermissionType permission) throws ApiException {
+    public void folderReadPermissionRequiredValidation(PermissionType permission){
         if(permission == null)
             throw new ApiException("User doesn't have read permission for this folder", HttpStatus.FORBIDDEN);
     }
     
-    public void folderWritePermissionRequiredValidation(PermissionType permission) throws ApiException {
+    public void folderWritePermissionRequiredValidation(PermissionType permission){
         if(permission != PermissionType.WRITE)
             throw new ApiException("User doesn't have write permission for this folder", HttpStatus.FORBIDDEN);
     }
@@ -172,7 +172,7 @@ public class FolderService {
     }
 
     @Transactional
-    public FolderContentsResponse getFolderContents(Long folderId, User user) throws ApiException {
+    public FolderContentsResponse getFolderContents(Long folderId, User user){
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
         folderExistenceRequiredValidation(folder);
 
@@ -189,7 +189,7 @@ public class FolderService {
     }
 
     @Transactional
-    public Folder createFolder(FolderCreateRequest folderCreateRequest, User user) throws ApiException {
+    public Folder createFolder(FolderCreateRequest folderCreateRequest, User user){
         FolderEntity parentFolder = folderRepository.findFolderEntityById(folderCreateRequest.getParentFolderId());
         folderExistenceRequiredValidation(parentFolder);
         
@@ -212,7 +212,7 @@ public class FolderService {
     }
 
     @Transactional
-    public Folder updateFolder(Long folderId, FolderUpdateRequest folderUpdateRequest, User user) throws ApiException {
+    public Folder updateFolder(Long folderId, FolderUpdateRequest folderUpdateRequest, User user){
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
         folderExistenceRequiredValidation(folder);
 
@@ -228,7 +228,7 @@ public class FolderService {
     }
 
     @Transactional
-    public void deleteFolder(Long folderId, User user) throws ApiException {
+    public void deleteFolder(Long folderId, User user){
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
         folderExistenceRequiredValidation(folder);
 

@@ -24,7 +24,7 @@ public class FileUploadController {
     @GetMapping("{uploadId}")
     public UploadStatusResponse getUploadStatus(
             @PathVariable Long uploadId,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         return fileUploadService.getUploadStatus(uploadId, user);
     }
@@ -33,7 +33,7 @@ public class FileUploadController {
     public void upload(
             HttpServletRequest request,
             @PathVariable Long uploadId,
-            @AuthenticationPrincipal User user) throws IOException, ApiException
+            @AuthenticationPrincipal User user) throws IOException
     {
         fileUploadService.upload(request, uploadId, user);
     }

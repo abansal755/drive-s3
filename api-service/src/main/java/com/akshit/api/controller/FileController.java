@@ -22,7 +22,7 @@ public class FileController {
     @PostMapping("")
     public FileCreateResponse createFile(
             @Valid @RequestBody FileCreateRequest fileCreateRequest,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         return fileService.createFile(fileCreateRequest, user);
     }
@@ -30,7 +30,7 @@ public class FileController {
     @GetMapping("{fileId}/download")
     public StreamingResponseBody downloadFile(
             @PathVariable Long fileId,
-            @AuthenticationPrincipal User user) throws IOException, ApiException
+            @AuthenticationPrincipal User user) throws IOException
     {
         return fileService.downloadFile(fileId, user);
     }
@@ -39,7 +39,7 @@ public class FileController {
     public File modifyFile(
             @RequestBody FileUpdateRequest fileUpdateRequest,
             @PathVariable Long fileId,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         return fileService.modifyFile(fileUpdateRequest, fileId, user);
     }
@@ -47,7 +47,7 @@ public class FileController {
     @DeleteMapping("{fileId}")
     public void deleteFile(
             @PathVariable Long fileId,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         fileService.deleteFile(fileId, user);
     }

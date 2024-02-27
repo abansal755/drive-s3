@@ -27,7 +27,7 @@ public class FolderController {
     @GetMapping("{folderId}")
     public FolderContentsResponse getFolderContents(
             @PathVariable Long folderId,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         return folderService.getFolderContents(folderId, user);
     }
@@ -35,7 +35,7 @@ public class FolderController {
     @PostMapping("")
     public Folder createFolder(
             @Valid @RequestBody FolderCreateRequest folderCreateRequest,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         return folderService.createFolder(folderCreateRequest, user);
     }
@@ -44,13 +44,13 @@ public class FolderController {
     public Folder updateFolder(
             @PathVariable Long folderId,
             @Valid @RequestBody FolderUpdateRequest folderUpdateRequest,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         return folderService.updateFolder(folderId, folderUpdateRequest, user);
     }
 
     @DeleteMapping("{folderId}")
-    public void deleteFolder(@PathVariable Long folderId, @AuthenticationPrincipal User user) throws ApiException {
+    public void deleteFolder(@PathVariable Long folderId, @AuthenticationPrincipal User user) {
         folderService.deleteFolder(folderId, user);
     }
 }

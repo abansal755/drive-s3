@@ -32,20 +32,20 @@ public class PermissionService {
     @Autowired
     private FileRepository fileRepository;
 
-    private void resourcePermissionNotExistsValidation(PermissionType permissionType, PermissionType existingPermission) throws ApiException {
+    private void resourcePermissionNotExistsValidation(PermissionType permissionType, PermissionType existingPermission){
         if((permissionType == PermissionType.READ) && (existingPermission != null))
             throw new ApiException("This user already has read permission to this resource", HttpStatus.BAD_REQUEST);
         if((permissionType == PermissionType.WRITE) && (existingPermission == PermissionType.WRITE))
             throw new ApiException("This user already has write permission to this resource", HttpStatus.BAD_REQUEST);
     }
 
-    private void permissionExistenceRequiredValidation(PermissionEntity permission) throws ApiException {
+    private void permissionExistenceRequiredValidation(PermissionEntity permission){
         if(permission == null)
             throw new ApiException("Permission not found", HttpStatus.NOT_FOUND);
     }
 
     @Transactional
-    public void createPermission(PermissionCreateRequest permissionCreateRequest, User user) throws ApiException {
+    public void createPermission(PermissionCreateRequest permissionCreateRequest, User user){
         PermissionType permissionType = permissionCreateRequest.getPermissionType();
         ResourceType resourceType = permissionCreateRequest.getResourceType();
         Long resourceId = permissionCreateRequest.getResourceId();
@@ -90,7 +90,7 @@ public class PermissionService {
     }
 
     @Transactional
-    public void deletePermission(Long permissionId, User user) throws ApiException {
+    public void deletePermission(Long permissionId, User user){
         PermissionEntity permission = permissionRepository.findPermissionEntityById(permissionId);
         permissionExistenceRequiredValidation(permission);
 

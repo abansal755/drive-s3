@@ -39,17 +39,17 @@ public class FileUploadService {
     @Autowired
     private TempStorageService tempStorageService;
 
-    public void fileUploadExistenceRequiredValidation(FileUploadEntity fileUpload) throws ApiException {
+    public void fileUploadExistenceRequiredValidation(FileUploadEntity fileUpload){
         if(fileUpload == null)
             throw new ApiException("Upload ID not found", HttpStatus.NOT_FOUND);
     }
 
-    public void fileUploadMatchUserValidation(FileUploadEntity fileUpload, User user) throws ApiException {
+    public void fileUploadMatchUserValidation(FileUploadEntity fileUpload, User user){
         if(!fileUpload.getUserId().equals(user.getId()))
             throw new ApiException("User doesn't have access to this upload ID", HttpStatus.FORBIDDEN);
     }
 
-    public UploadStatusResponse getUploadStatus(Long uploadId,User user) throws ApiException {
+    public UploadStatusResponse getUploadStatus(Long uploadId,User user){
         FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
         fileUploadExistenceRequiredValidation(fileUpload);
         fileUploadMatchUserValidation(fileUpload, user);
@@ -60,7 +60,7 @@ public class FileUploadService {
                         .build();
     }
 
-    public void upload(HttpServletRequest request, Long uploadId, User user) throws IOException, ApiException {
+    public void upload(HttpServletRequest request, Long uploadId, User user) throws IOException {
         // validations
         FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
         fileUploadExistenceRequiredValidation(fileUpload);

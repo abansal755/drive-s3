@@ -19,7 +19,7 @@ public class PermissionController {
     @PostMapping("")
     public void createPermission(
             @Valid @RequestBody PermissionCreateRequest permissionCreateRequest,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         permissionService.createPermission(permissionCreateRequest, user);
     }
@@ -27,7 +27,7 @@ public class PermissionController {
     @DeleteMapping("{permissionId}")
     public void deletePermission(
             @PathVariable Long permissionId,
-            @AuthenticationPrincipal User user) throws ApiException
+            @AuthenticationPrincipal User user)
     {
         permissionService.deletePermission(permissionId, user);
     }

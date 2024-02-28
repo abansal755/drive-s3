@@ -16,19 +16,21 @@ import { AuthContextProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import UnprotectedRoute from "./components/common/UnprotectedRoute";
 import Folder from "./components/Folder";
-import './main.module.css';
+import "./main.module.css";
+import RootIndex from "./components/RootIndex";
 
 const router = createBrowserRouter(
 	createRoutesFromChildren(
 		<Fragment>
-			<Route path="/" element={<ProtectedRoute/>}>
-				<Route path="/" element={<Root/>}>
-					<Route path="folder/:folderId" element={<Folder/>}/>
+			<Route element={<ProtectedRoute />}>
+				<Route path="/" element={<Root />}>
+					<Route element={<RootIndex />} index />
+					<Route path="folder/:folderId" element={<Folder />} />
 				</Route>
 			</Route>
-			<Route path="/" element={<UnprotectedRoute/>}>
-				<Route path="login" element={<Login/>} />
-				<Route path="register" element={<Register/>} />
+			<Route element={<UnprotectedRoute />}>
+				<Route path="login" element={<Login />} />
+				<Route path="register" element={<Register />} />
 			</Route>
 		</Fragment>
 	)

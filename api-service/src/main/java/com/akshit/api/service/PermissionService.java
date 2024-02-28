@@ -52,6 +52,9 @@ public class PermissionService {
         Long userId = permissionCreateRequest.getUserId(); //TODO: validation for user ID
         User otherUser = new User(userId);
 
+        if(user.getId().equals(userId))
+            throw new ApiException("Can't give permission to yourself", HttpStatus.BAD_REQUEST);
+
         if(resourceType == ResourceType.FOLDER){
             FolderEntity folder = folderRepository.findFolderEntityById(resourceId);
             folderService.folderExistenceRequiredValidation(folder);

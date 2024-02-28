@@ -245,4 +245,44 @@ public class FolderService {
         FolderEntity rootFolder = folderRepository.findFolderEntityById(mapping.getFolderId());
         return Folder.fromEntity(rootFolder);
     }
+
+    @Transactional
+    public AncestorsResponse getFolderAncestors(Long folderId, User user){
+        FolderEntity folder = folderRepository.findFolderEntityById(folderId);
+        folderExistenceRequiredValidation(folder);
+
+        List<FolderEntity> ancestors = new ArrayList<>();
+
+        int[] lastAccessibleFolder = { -1 };
+        FolderEntity[] rootFolder = { null };
+        forEachAncestor(folder, (currentFolder) -> {
+            ancestors.add(currentFolder);
+            rootFolder[0] = currentFolder;
+
+            PermissionEntity permission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(
+                    currentFolder.getId(),
+                    ResourceType.FOLDER,
+                    user.getId());
+            if(permission != null)
+                lastAccessibleFolder[0] = ancestors.size() - 1;
+            return true;
+        });
+
+        if((lastAccessibleFolder[0] == -1) && !checkIfFolderIsOwnedByUser(rootFolder[0], user))
+            throw new ApiException("User doesn't have read permission for this folder", HttpStatus.FORBIDDEN);
+
+        List<FolderEntity> ancestorsRes = ancestors;
+        Collections.reverse(ancestorsRes);
+        if(lastAccessibleFolder[0] != -1)
+            ancestorsRes = ancestors.subList(0, lastAccessibleFolder[0] + 1);
+        return AncestorsResponse
+                .builder()
+                .ancestors(
+                        ancestorsRes
+                                .stream()
+                                .map(Folder::fromEntity)
+                                .toList()
+                )
+                .build();
+    }
 }

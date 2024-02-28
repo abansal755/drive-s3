@@ -24,12 +24,20 @@ public class FolderController {
         return folderService.getRootFolderForUser(user);
     }
 
-    @GetMapping("{folderId}")
+    @GetMapping("{folderId}/contents")
     public FolderContentsResponse getFolderContents(
             @PathVariable Long folderId,
             @AuthenticationPrincipal User user)
     {
         return folderService.getFolderContents(folderId, user);
+    }
+
+    @GetMapping("{folderId}/ancestors")
+    public AncestorsResponse getFolderAncestors(
+            @PathVariable Long folderId,
+            @AuthenticationPrincipal User user
+    ){
+        return folderService.getFolderAncestors(folderId, user);
     }
 
     @PostMapping("")

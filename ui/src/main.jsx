@@ -15,18 +15,19 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { AuthContextProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import UnprotectedRoute from "./components/common/UnprotectedRoute";
+import Folder from "./components/Folder";
 
 const router = createBrowserRouter(
 	createRoutesFromChildren(
 		<Fragment>
 			<Route path="/" element={<ProtectedRoute/>}>
 				<Route path="/" element={<Root/>}>
-					
+					<Route path="folder/:folderId" element={<Folder/>}/>
 				</Route>
 			</Route>
 			<Route path="/" element={<UnprotectedRoute/>}>
-				<Route path="login" element={<Login />} />
-				<Route path="register" element={<Register />} />
+				<Route path="login" element={<Login/>} />
+				<Route path="register" element={<Register/>} />
 			</Route>
 		</Fragment>
 	)

@@ -10,8 +10,8 @@ import {
 	MenuList,
 	MenuItem,
 	Avatar,
-	Text,
 } from "@chakra-ui/react";
+import { Outlet } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 
 const Root = () => {
@@ -22,7 +22,7 @@ const Root = () => {
 		<Flex h="100vh" w="100vw" flexDirection="column">
 			<Box bgColor="teal" py={3}>
 				<Container
-					maxW="container.lg"
+					maxW="container.xl"
 					display="flex"
 					flexDirection="row"
 					justifyContent="space-between"
@@ -30,11 +30,14 @@ const Root = () => {
 				>
 					<Heading size="md">Drive</Heading>
 					<Menu>
-						<MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-							<Box display="flex" alignItems="center">
+						<MenuButton
+							as={Button}
+							rightIcon={<ChevronDownIcon />}
+							leftIcon={
 								<Avatar name={userFullName} size="xs" mr={2} />
-								<Text>{userFullName}</Text>
-							</Box>
+							}
+						>
+							{userFullName}
 						</MenuButton>
 						<MenuList>
 							<MenuItem>Profile</MenuItem>
@@ -43,6 +46,9 @@ const Root = () => {
 						</MenuList>
 					</Menu>
 				</Container>
+			</Box>
+			<Box flexGrow={1}>
+				<Outlet />
 			</Box>
 		</Flex>
 	);

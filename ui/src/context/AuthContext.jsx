@@ -20,17 +20,24 @@ export const AuthContextProvider = ({ children }) => {
 				return user;
 			} catch (err) {
 				console.log(err);
+				return null;
 			}
-			return null;
 		},
 		staleTime: Infinity,
 	});
 
 	useEffect(() => {
 		if (!user) return;
-		const expireAt = user.tokensSummary.accessTokenExpireAtMillis;
+		const expireAt = user.accessTokenExpireAtMillis;
 		const id = setInterval(
-			() => authInstance.post("/api/v1/token"),
+			async () => {
+				try { authInstance.post("/api/v1/token") }
+				catch(err) {
+					console.error(err);
+					logoutMutation.mutate();
+					clearTimeout(id);
+				}
+			},
 			expireAt - 10 * 1000 - Date.now()
 		);
 

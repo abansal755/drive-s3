@@ -34,7 +34,7 @@ const Login = () => {
 
 	return (
 		<Center h="100vh" w="100vw">
-			<Container p={10} bgColor="gray.900" borderRadius="2xl">
+			<Container p={10} bgColor="gray.700" borderRadius="2xl">
 				<Stack spacing={3} as="form" onSubmit={formSubmitHandler}>
 					<Heading size="lg" textAlign="center" mb={10}>
 						Login

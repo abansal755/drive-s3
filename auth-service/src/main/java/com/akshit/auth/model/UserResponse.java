@@ -17,7 +17,7 @@ public class UserResponse {
     private String lastName;
     private boolean usernamePasswordRegistration;
     private boolean githubRegistration;
-    private TokensSummary tokensSummary;
+    private long accessTokenExpireAtMillis;
 
     public static UserResponse.UserResponseBuilder builderFromEntity(UserEntity user){
         return UserResponse
@@ -30,9 +30,9 @@ public class UserResponse {
                 .githubRegistration(user.isGithubRegistration());
     }
 
-    public static UserResponse fromEntityAndTokens(UserEntity user, Token accessToken, Token refreshToken){
+    public static UserResponse fromEntityAndAccessToken(UserEntity user, Token accessToken){
         return builderFromEntity(user)
-                .tokensSummary(TokensSummary.fromTokens(accessToken, refreshToken))
+                .accessTokenExpireAtMillis(accessToken.getExpireAtMillis())
                 .build();
     }
 }

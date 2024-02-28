@@ -39,14 +39,9 @@ public class UserController {
     @GetMapping("")
     public UserResponse getUserDetails(HttpServletRequest request, @AuthenticationPrincipal UserEntity user){
         String accessTokenValue = Cookies.readServletCookie(request, "access_token");
-        String refreshTokenValue = Cookies.readServletCookie(request, "refresh_token");
-
-        return UserResponse.builderFromEntity(user)
-                .tokensSummary(TokensSummary
-                        .builder()
-                        .accessTokenExpireAtMillis(jwtService.extractExpiration(accessTokenValue).getTime())
-                        .refreshTokenExpireAtMillis(jwtService.extractExpiration(refreshTokenValue).getTime())
-                        .build())
+        return UserResponse
+                .builderFromEntity(user)
+                .accessTokenExpireAtMillis(jwtService.extractExpiration(accessTokenValue).getTime())
                 .build();
     }
 
@@ -61,7 +56,7 @@ public class UserController {
                 .ok()
                 .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
                 .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
-                .body(UserResponse.fromEntityAndTokens(user, accessToken, refreshToken));
+                .body(UserResponse.fromEntityAndAccessToken(user, accessToken));
     }
 
     @PostMapping("/login")
@@ -79,7 +74,7 @@ public class UserController {
                 .ok()
                 .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
                 .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
-                .body(UserResponse.fromEntityAndTokens(user, accessToken, refreshToken));
+                .body(UserResponse.fromEntityAndAccessToken(user, accessToken));
     }
 
     @PostMapping("/logout")

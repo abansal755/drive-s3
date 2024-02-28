@@ -9,4 +9,5 @@ import java.util.List;
 @Builder
 public class AncestorsResponse {
     private List<Folder> ancestors;
+    private User rootFolderOwner;
 }

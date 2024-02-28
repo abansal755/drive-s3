@@ -2,6 +2,7 @@ package com.akshit.api.config;
 
 import com.akshit.api.model.User;
 import com.akshit.api.repo.UserRootFolderMappingRepository;
+import com.akshit.api.service.AuthService;
 import com.akshit.api.service.FolderService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,11 +30,11 @@ import java.util.List;
 @Component
 public class AuthFilter extends OncePerRequestFilter {
 
-    @Value("${auth-service.uri}")
-    private String authServiceUri;
-
     @Autowired
     private FolderService folderService;
+
+    @Autowired
+    private AuthService authService;
 
     @Override
     protected void doFilterInternal(
@@ -48,17 +49,7 @@ public class AuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        ResponseCookie accessTokenCookie = ResponseCookie
-                .from("access_token", accessToken)
-                .build();
-        User user = RestClient
-                .create()
-                .get()
-                .uri(authServiceUri + "/api/v1/users")
-                .header(HttpHeaders.COOKIE, accessTokenCookie.toString())
-                .retrieve()
-                .body(User.class);
-
+        User user = authService.getUserByAccessToken(accessToken);
         folderService.createUserRootFolderMappingIfNotExists(user);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();

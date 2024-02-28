@@ -35,6 +35,9 @@ public class FolderService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private AuthService authService;
+
     @Transactional(propagation = Propagation.MANDATORY)
     public FolderEntity getParentFolder(FolderEntity folder){
         Long parentFolderId = folder.getParentFolderId();
@@ -94,10 +97,16 @@ public class FolderService {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public boolean checkIfFolderIsOwnedByUser(FolderEntity folder, User user){
+    public Long getFolderOwnerId(FolderEntity folder){
         FolderEntity rootFolder = getRootFolder(folder);
         UserRootFolderMappingEntity mapping = userRootFolderMappingRepository.findByFolderId(rootFolder.getId());
-        return (mapping.getUserId().equals(user.getId()));
+        return mapping.getUserId();
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public boolean checkIfFolderIsOwnedByUser(FolderEntity folder, User user){
+        Long ownerId = getFolderOwnerId(folder);
+        return (ownerId.equals(user.getId()));
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -275,6 +284,10 @@ public class FolderService {
         Collections.reverse(ancestorsRes);
         if(lastAccessibleFolder[0] != -1)
             ancestorsRes = ancestors.subList(0, lastAccessibleFolder[0] + 1);
+
+        Long ownerId = getFolderOwnerId(rootFolder[0]);
+        User owner = authService.getUserById(ownerId);
+
         return AncestorsResponse
                 .builder()
                 .ancestors(
@@ -283,6 +296,7 @@ public class FolderService {
                                 .map(Folder::fromEntity)
                                 .toList()
                 )
+                .rootFolderOwner(owner)
                 .build();
     }
 }

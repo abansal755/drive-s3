@@ -81,4 +81,24 @@ public class UserController {
                 .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
                 .body(UserResponse.fromEntityAndTokens(user, accessToken, refreshToken));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logoutUser(){
+        ResponseCookie removeAccessTokenCookie = ResponseCookie
+                .from("access_token", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+        ResponseCookie removeRefreshTokenCookie = ResponseCookie
+                .from("refresh_token", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, removeAccessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, removeRefreshTokenCookie.toString())
+                .build();
+    }
 }

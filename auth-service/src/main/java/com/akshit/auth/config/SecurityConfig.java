@@ -1,5 +1,6 @@
 package com.akshit.auth.config;
 
+import com.akshit.auth.entity.Role;
 import com.akshit.auth.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,10 @@ public class SecurityConfig {
             new AntPathRequestMatcher("/api/v1/users", "GET")
     };
 
+    private AntPathRequestMatcher[] adminRequestPaths = {
+            new AntPathRequestMatcher("/api/v1/users/**", "GET")
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -40,6 +45,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(authenticatedRequestPaths)
                         .authenticated()
+                        .requestMatchers(adminRequestPaths)
+                        .hasAuthority(Role.ADMIN.name())
                         .anyRequest()
                         .permitAll()
                 )

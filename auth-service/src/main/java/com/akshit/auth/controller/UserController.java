@@ -37,12 +37,18 @@ public class UserController {
     private AuthenticationManager authenticationManager;
 
     @GetMapping("")
-    public UserResponse getUserDetails(HttpServletRequest request, @AuthenticationPrincipal UserEntity user){
+    public UserResponse getLoggedInUserDetails(HttpServletRequest request, @AuthenticationPrincipal UserEntity user){
         String accessTokenValue = Cookies.readServletCookie(request, "access_token");
         return UserResponse
                 .builderFromEntity(user)
                 .accessTokenExpireAtMillis(jwtService.extractExpiration(accessTokenValue).getTime())
                 .build();
+    }
+
+    @GetMapping("{userId}")
+    public UserResponse getUserDetails(HttpServletRequest request, @PathVariable Long userId){
+        UserEntity user = userService.findUserById(userId);
+        return UserResponse.fromEntity(user);
     }
 
     @PostMapping("")

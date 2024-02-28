@@ -1,6 +1,7 @@
 package com.akshit.auth.model;
 
 import com.akshit.auth.entity.UserEntity;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 public class UserResponse {
     private Long id;
     private String email;
@@ -33,6 +35,11 @@ public class UserResponse {
     public static UserResponse fromEntityAndAccessToken(UserEntity user, Token accessToken){
         return builderFromEntity(user)
                 .accessTokenExpireAtMillis(accessToken.getExpireAtMillis())
+                .build();
+    }
+
+    public static UserResponse fromEntity(UserEntity user){
+        return builderFromEntity(user)
                 .build();
     }
 }

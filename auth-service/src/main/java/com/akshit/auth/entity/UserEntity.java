@@ -24,19 +24,28 @@ public class UserEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
-    
+
+    @Column(nullable = false)
     private String password;
+
     private String firstName;
     private String lastName;
 
+    @Column(nullable = false)
     private boolean usernamePasswordRegistration;
+
+    @Column(nullable = false)
     private boolean githubRegistration;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("USER"));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

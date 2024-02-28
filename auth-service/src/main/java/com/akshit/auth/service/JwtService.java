@@ -6,6 +6,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.security.Key;
@@ -25,6 +27,16 @@ public class JwtService {
     @Value("${jwt.secret-key}")
     private String SECRET_KEY;
 
+//    Generating long-lived access token for admin
+//    @Autowired
+//    private UserService userService;
+//
+//    @PostConstruct
+//    public void init(){
+//        Token token = generateUserToken(userService.findUserById(102L), 1000L * 60 * 60 * 24 * 365 * 10);
+//        System.out.println(token.getValue());
+//    }
+
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
@@ -38,11 +50,11 @@ public class JwtService {
         return generateUserToken(user, REFRESH_EXPIRE_AFTER_MILLIS);
     }
 
-    private Token generateUserToken(UserEntity user, int expireAfterMillis){
+    private Token generateUserToken(UserEntity user, long expireAfterMillis){
         return generateUserToken(new HashMap<String, Object>(), user, expireAfterMillis);
     }
 
-    private Token generateUserToken(Map<String, Object> extraClaims, UserEntity user, int expireAfterMillis){
+    private Token generateUserToken(Map<String, Object> extraClaims, UserEntity user, long expireAfterMillis){
         long issuedAtMillis = new Date().getTime();
         long expireAtMillis = issuedAtMillis + expireAfterMillis;
 

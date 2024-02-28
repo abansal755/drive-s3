@@ -1,5 +1,6 @@
 package com.akshit.auth.service;
 
+import com.akshit.auth.entity.Role;
 import com.akshit.auth.entity.UserEntity;
 import com.akshit.auth.model.RegisterRequest;
 import com.akshit.auth.repo.UserRepository;
@@ -30,6 +31,10 @@ public class UserService implements UserDetailsService {
         return userRepository.findUserEntityByEmail(email);
     }
 
+    public UserEntity findUserById(Long userId){
+        return userRepository.findUserEntityById(userId);
+    }
+
     public UserEntity registerUser(RegisterRequest registerRequest){
         UserEntity user = UserEntity
                 .builder()
@@ -39,6 +44,7 @@ public class UserService implements UserDetailsService {
                 .lastName(registerRequest.getLastName())
                 .usernamePasswordRegistration(true)
                 .githubRegistration(false)
+                .role(Role.USER)
                 .build();
         return userRepository.save(user);
     }

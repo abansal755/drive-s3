@@ -2,11 +2,11 @@ package com.akshit.auth.controller;
 
 import com.akshit.auth.config.AppConfig;
 import com.akshit.auth.entity.UserEntity;
-import com.akshit.auth.model.LoginRequest;
-import com.akshit.auth.model.RegisterRequest;
-import com.akshit.auth.model.UserResponse;
+import com.akshit.auth.model.*;
 import com.akshit.auth.service.JwtService;
 import com.akshit.auth.service.UserService;
+import com.akshit.auth.utils.Cookies;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -37,22 +37,31 @@ public class UserController {
     private AuthenticationManager authenticationManager;
 
     @GetMapping("")
-    public UserResponse getUserDetails(@AuthenticationPrincipal UserEntity user){
-        return UserResponse.fromEntity(user);
+    public UserResponse getUserDetails(HttpServletRequest request, @AuthenticationPrincipal UserEntity user){
+        String accessTokenValue = Cookies.readServletCookie(request, "access_token");
+        String refreshTokenValue = Cookies.readServletCookie(request, "refresh_token");
+
+        return UserResponse.builderFromEntity(user)
+                .tokensSummary(TokensSummary
+                        .builder()
+                        .accessTokenExpireAtMillis(jwtService.extractExpiration(accessTokenValue).getTime())
+                        .refreshTokenExpireAtMillis(jwtService.extractExpiration(refreshTokenValue).getTime())
+                        .build())
+                .build();
     }
 
     @PostMapping("")
     public ResponseEntity<UserResponse> registerUser(@RequestBody RegisterRequest registerRequest){
         UserEntity user = userService.registerUser(registerRequest);
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        Token accessToken = jwtService.generateAccessToken(user);
+        Token refreshToken = jwtService.generateRefreshToken(user);
 
         return ResponseEntity
                 .ok()
-                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken).toString())
-                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken).toString())
-                .body(UserResponse.fromEntity(user));
+                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
+                .body(UserResponse.fromEntityAndTokens(user, accessToken, refreshToken));
     }
 
     @PostMapping("/login")
@@ -63,13 +72,13 @@ public class UserController {
         authenticationManager.authenticate(authentication);
 
         UserEntity user = userService.findUserByEmail(loginRequest.getEmail());
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        Token accessToken = jwtService.generateAccessToken(user);
+        Token refreshToken = jwtService.generateRefreshToken(user);
 
         return ResponseEntity
                 .ok()
-                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken).toString())
-                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken).toString())
-                .body(UserResponse.fromEntity(user));
+                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
+                .body(UserResponse.fromEntityAndTokens(user, accessToken, refreshToken));
     }
 }

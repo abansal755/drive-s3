@@ -1,6 +1,7 @@
 package com.akshit.auth.service;
 
 import com.akshit.auth.entity.UserEntity;
+import com.akshit.auth.model.Token;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -29,27 +30,35 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(UserEntity user) {
+    public Token generateAccessToken(UserEntity user) {
         return generateUserToken(user, ACCESS_EXPIRE_AFTER_MILLIS);
     }
 
-    public String generateRefreshToken(UserEntity user) {
+    public Token generateRefreshToken(UserEntity user) {
         return generateUserToken(user, REFRESH_EXPIRE_AFTER_MILLIS);
     }
 
-    private String generateUserToken(UserEntity user, int expireAfterMillis){
+    private Token generateUserToken(UserEntity user, int expireAfterMillis){
         return generateUserToken(new HashMap<String, Object>(), user, expireAfterMillis);
     }
 
-    private String generateUserToken(Map<String, Object> extraClaims, UserEntity user, int expireAfterMillis){
-        return Jwts
+    private Token generateUserToken(Map<String, Object> extraClaims, UserEntity user, int expireAfterMillis){
+        long issuedAtMillis = new Date().getTime();
+        long expireAtMillis = issuedAtMillis + expireAfterMillis;
+
+        String token = Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(user.getEmail())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expireAfterMillis))
+                .setIssuedAt(new Date(issuedAtMillis))
+                .setExpiration(new Date(expireAtMillis))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+        return Token
+                .builder()
+                .value(token)
+                .expireAtMillis(expireAtMillis)
+                .build();
     }
 
     public String generateToken(String subject, Map<String, Object> extraClaims){

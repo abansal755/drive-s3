@@ -17,8 +17,9 @@ public class UserResponse {
     private String lastName;
     private boolean usernamePasswordRegistration;
     private boolean githubRegistration;
+    private TokensSummary tokensSummary;
 
-    public static UserResponse fromEntity(UserEntity user){
+    public static UserResponse.UserResponseBuilder builderFromEntity(UserEntity user){
         return UserResponse
                 .builder()
                 .id(user.getId())
@@ -26,7 +27,12 @@ public class UserResponse {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .usernamePasswordRegistration(user.isUsernamePasswordRegistration())
-                .githubRegistration(user.isGithubRegistration())
+                .githubRegistration(user.isGithubRegistration());
+    }
+
+    public static UserResponse fromEntityAndTokens(UserEntity user, Token accessToken, Token refreshToken){
+        return builderFromEntity(user)
+                .tokensSummary(TokensSummary.fromTokens(accessToken, refreshToken))
                 .build();
     }
 }

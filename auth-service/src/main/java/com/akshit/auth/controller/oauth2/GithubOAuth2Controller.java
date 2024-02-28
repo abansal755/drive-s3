@@ -3,6 +3,7 @@ package com.akshit.auth.controller.oauth2;
 import com.akshit.auth.entity.UserEntity;
 import com.akshit.auth.model.GithubAccessTokenRequestResponse;
 import com.akshit.auth.model.GithubGetUserRequestResponse;
+import com.akshit.auth.model.Token;
 import com.akshit.auth.service.JwtService;
 import com.akshit.auth.service.UserService;
 import com.akshit.auth.service.oauth2.GithubOAuth2Service;
@@ -102,14 +103,14 @@ public class GithubOAuth2Controller {
             userService.save(user);
         }
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        Token accessToken = jwtService.generateAccessToken(user);
+        Token refreshToken = jwtService.generateRefreshToken(user);
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, (!referer.equals("")) ? referer : "http://localhost:8080")
-                .header(HttpHeaders.SET_COOKIE, Cookies.getAccessTokenCookie(accessToken).toString())
-                .header(HttpHeaders.SET_COOKIE, Cookies.getRefreshTokenCookie(refreshToken).toString())
+                .header(HttpHeaders.SET_COOKIE, Cookies.getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, Cookies.getRefreshTokenCookie(refreshToken.getValue()).toString())
                 .header(HttpHeaders.SET_COOKIE, removeStateCookie.toString())
                 .build();
     }

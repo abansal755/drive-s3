@@ -13,8 +13,20 @@ import {
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
 import { Link as ReactRouterLink } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { apiInstance } from "../../lib/axios";
 
-const Header = ({ ancestors, rootFolderOwner }) => {
+const Header = ({ folderId }) => {
+	const { data, isSuccess } = useQuery({
+		queryKey: ["folder", folderId, "ancestors"],
+		queryFn: async () => {
+			const { data: folderAncestors } = await apiInstance.get(
+				`/api/v1/folders/${folderId}/ancestors`
+			);
+			return folderAncestors;
+		},
+	});
+
 	return (
 		<Box
 			bgColor="cyan.700"
@@ -25,36 +37,37 @@ const Header = ({ ancestors, rootFolderOwner }) => {
 			alignItems="center"
 		>
 			<Breadcrumb separator={<ChevronRightIcon />}>
-				{ancestors.map((ancestor, idx) => (
-					<BreadcrumbItem key={ancestor.id}>
-						{!ancestor.folderName && (
-							<Avatar
-								name={`${rootFolderOwner.firstName} ${rootFolderOwner.lastName}`}
-								size="sm"
-								mr={2}
-							/>
-						)}
-						<BreadcrumbLink
-							as={ReactRouterLink}
-							to={`../folder/${ancestor.id}`}
-							display="flex"
-							alignItems="center"
-						>
-							<Text
-								fontSize="xl"
-								fontWeight={
-									idx === ancestors.length - 1
-										? "medium"
-										: "normal"
-								}
+				{isSuccess &&
+					data.ancestors.map((ancestor, idx) => (
+						<BreadcrumbItem key={ancestor.id}>
+							{!ancestor.folderName && (
+								<Avatar
+									name={`${data.rootFolderOwner.firstName} ${data.rootFolderOwner.lastName}`}
+									size="sm"
+									mr={2}
+								/>
+							)}
+							<BreadcrumbLink
+								as={ReactRouterLink}
+								to={`../folder/${ancestor.id}`}
+								display="flex"
+								alignItems="center"
 							>
-								{!!ancestor.folderName
-									? ancestor.folderName
-									: rootFolderOwner.email}
-							</Text>
-						</BreadcrumbLink>
-					</BreadcrumbItem>
-				))}
+								<Text
+									fontSize="xl"
+									fontWeight={
+										idx === data.ancestors.length - 1
+											? "medium"
+											: "normal"
+									}
+								>
+									{!!ancestor.folderName
+										? ancestor.folderName
+										: data.rootFolderOwner.email}
+								</Text>
+							</BreadcrumbLink>
+						</BreadcrumbItem>
+					))}
 			</Breadcrumb>
 			<Menu>
 				<MenuButton as={Button} rightIcon={<AddIcon />}>

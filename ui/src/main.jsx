@@ -16,6 +16,7 @@ import { AuthContextProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import UnprotectedRoute from "./components/common/UnprotectedRoute";
 import Folder from "./components/Folder";
+import './main.module.css';
 
 const router = createBrowserRouter(
 	createRoutesFromChildren(

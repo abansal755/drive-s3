@@ -26,8 +26,7 @@ public class UserEntity implements UserDetails {
 
     @Column(unique = true, nullable = false)
     private String email;
-
-    @Column(nullable = false)
+    
     private String password;
 
     private String firstName;
@@ -85,6 +84,7 @@ public class UserEntity implements UserDetails {
                 .lastName(lastName)
                 .usernamePasswordRegistration(false)
                 .githubRegistration(true)
+                .role(Role.USER)
                 .build();
     }
 

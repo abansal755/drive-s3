@@ -32,4 +32,6 @@ public class FileEntity {
 
     @Column(nullable = false)
     private Long createdAt;
+
+    private Long sizeInBytes;
 }

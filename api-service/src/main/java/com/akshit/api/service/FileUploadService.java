@@ -8,6 +8,7 @@ import com.akshit.api.model.UploadStatusResponse;
 import com.akshit.api.model.User;
 import com.akshit.api.repo.FileRepository;
 import com.akshit.api.repo.FileUploadRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,8 +87,10 @@ public class FileUploadService {
         fileUploadRepository.save(fileUpload);
 
         // update file's s3 info
+        Long size = s3Service.getS3ObjectSize(fileName);
         file.setS3BucketName(S3_BUCKET_NAME);
         file.setS3ObjectKey(fileName);
+        file.setSizeInBytes(size);
         fileRepository.save(file);
     }
 }

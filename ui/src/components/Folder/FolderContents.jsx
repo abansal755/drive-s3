@@ -16,6 +16,7 @@ import { Link as ReactRouterLink } from "react-router-dom";
 import FileIcon from "../../assets/icons/FileIcon";
 import FolderIcon from "../../assets/icons/FolderIcon";
 import { apiInstance } from "../../lib/axios";
+import prettyBytes from 'pretty-bytes';
 
 const epochToDateString = (epoch) => {
 	const date = new Date(epoch);
@@ -53,6 +54,7 @@ const FolderContents = ({ folderId }) => {
 						<Th>Name</Th>
 						<Th>Type</Th>
 						<Th>Created At</Th>
+						<Th>Size</Th>
 					</Tr>
 				</Thead>
 				<Tbody>
@@ -92,6 +94,7 @@ const FolderContents = ({ folderId }) => {
 									</Td>
 									<Td>File</Td>
 									<Td>{epochToDateString(file.createdAt)}</Td>
+									<Td>{file.sizeInBytes && prettyBytes(file.sizeInBytes)}</Td>
 								</Tr>
 							))}
 						</Fragment>

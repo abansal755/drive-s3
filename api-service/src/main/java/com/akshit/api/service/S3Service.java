@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -51,5 +48,15 @@ public class S3Service {
                 .key(s3ObjectKey)
                 .build();
         s3Client.deleteObject(deleteObjectRequest);
+    }
+
+    public Long getS3ObjectSize(String s3ObjectKey){
+        GetObjectAttributesRequest request = GetObjectAttributesRequest
+                .builder()
+                .bucket(S3_BUCKET_NAME)
+                .key(s3ObjectKey)
+                .objectAttributes(ObjectAttributes.OBJECT_SIZE)
+                .build();
+        return s3Client.getObjectAttributes(request).objectSize();
     }
 }

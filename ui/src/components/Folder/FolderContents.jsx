@@ -1,29 +1,9 @@
-import {
-	Stack,
-	Table,
-	Thead,
-	Tr,
-	Th,
-	Tbody,
-	Td,
-	Link as ChakraLink,
-	Progress,
-	Text,
-} from "@chakra-ui/react";
+import { Stack, Table, Thead, Tr, Th, Tbody, Progress } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment } from "react";
-import { Link as ReactRouterLink } from "react-router-dom";
-import FileIcon from "../../assets/icons/FileIcon";
-import FolderIcon from "../../assets/icons/FolderIcon";
 import { apiInstance } from "../../lib/axios";
-import prettyBytes from "pretty-bytes";
-import RenameFolderButton from "./FolderContents/RenameFolderButton.jsx";
-import DeleteFolderButton from "./FolderContents/DeleteFolderButton.jsx";
-
-const epochToDateString = (epoch) => {
-	const date = new Date(epoch);
-	return `${date.toLocaleTimeString()}, ${date.toLocaleDateString()}`;
-};
+import FolderRow from "./FolderContents/FolderRow.jsx";
+import FileRow from "./FolderContents/FileRow.jsx";
 
 const FolderContents = ({ folderId }) => {
 	const { data, isLoading, isSuccess } = useQuery({
@@ -64,55 +44,18 @@ const FolderContents = ({ folderId }) => {
 					{isSuccess && (
 						<Fragment>
 							{data.folders.map((folder) => (
-								<Tr key={`folder-${folder.id}`}>
-									<Td>
-										<ChakraLink
-											as={ReactRouterLink}
-											to={`../folder/${folder.id}`}
-											display="flex"
-										>
-											<FolderIcon boxSize={5} mr={1} />
-											<Text>{folder.folderName}</Text>
-										</ChakraLink>
-									</Td>
-									<Td>Folder</Td>
-									<Td>
-										{epochToDateString(folder.createdAt)}
-									</Td>
-									<Td></Td>
-									<Td>
-										<RenameFolderButton
-											folder={folder}
-											parentFolderId={folderId}
-										/>
-										<DeleteFolderButton
-											folder={folder}
-											parentFolderId={folderId}
-										/>
-									</Td>
-								</Tr>
+								<FolderRow
+									folder={folder}
+									parentFolderId={folderId}
+									key={`folder-${folder.id}`}
+								/>
 							))}
 							{data.files.map((file) => (
-								<Tr key={`file-${file.id}`}>
-									<Td>
-										<ChakraLink
-											as={ReactRouterLink}
-											to={`../file/${file.id}`}
-											display="flex"
-										>
-											<FileIcon boxSize={5} mr={1} />
-											<Text>
-												{file.name}.{file.extension}
-											</Text>
-										</ChakraLink>
-									</Td>
-									<Td>File</Td>
-									<Td>{epochToDateString(file.createdAt)}</Td>
-									<Td>
-										{file.sizeInBytes &&
-											prettyBytes(file.sizeInBytes)}
-									</Td>
-								</Tr>
+								<FileRow
+									file={file}
+									key={`file-${file.id}`}
+									parentFolderId={folderId}
+								/>
 							))}
 						</Fragment>
 					)}

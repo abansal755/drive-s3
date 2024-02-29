@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import PencilSquareIcon from "../../../assets/icons/PencilSquareIcon.jsx";
+import PencilSquareIcon from "../../../../assets/icons/PencilSquareIcon.jsx";
 import {
 	Button,
 	IconButton,
@@ -15,7 +15,7 @@ import {
 	useDisclosure,
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiInstance } from "../../../lib/axios.js";
+import { apiInstance } from "../../../../lib/axios.js";
 
 const RenameFolderButton = ({ folder, parentFolderId }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -37,17 +37,12 @@ const RenameFolderButton = ({ folder, parentFolderId }) => {
 	const formSubmitHandler = (e) => {
 		e.preventDefault();
 		mutation.mutate(folderName);
-		modalCloseHandler();
+		onClose();
 	};
 
 	const modalOpenHandler = () => {
 		onOpen();
 		setFolderName(folder.folderName);
-	};
-
-	const modalCloseHandler = () => {
-		setFolderName("");
-		onClose();
 	};
 
 	return (
@@ -60,7 +55,7 @@ const RenameFolderButton = ({ folder, parentFolderId }) => {
 					onClick={modalOpenHandler}
 				/>
 			</Tooltip>
-			<Modal isOpen={isOpen} onClose={modalCloseHandler}>
+			<Modal isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />
 				<ModalContent as="form" onSubmit={formSubmitHandler}>
 					<ModalHeader>Rename Folder</ModalHeader>
@@ -77,7 +72,7 @@ const RenameFolderButton = ({ folder, parentFolderId }) => {
 						<Button mr={3} colorScheme="teal" type="submit">
 							Rename
 						</Button>
-						<Button onClick={modalCloseHandler}>Cancel</Button>
+						<Button onClick={onClose}>Cancel</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>

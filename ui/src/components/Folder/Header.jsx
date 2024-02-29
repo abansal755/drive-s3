@@ -21,7 +21,7 @@ const Header = ({ folderId }) => {
 		queryKey: ["folder", folderId, "ancestors"],
 		queryFn: async () => {
 			const { data: folderAncestors } = await apiInstance.get(
-				`/api/v1/folders/${folderId}/ancestors`
+				`/api/v1/folders/${folderId}/ancestors`,
 			);
 			return folderAncestors;
 		},

@@ -7,12 +7,13 @@ import {
 	Input,
 	InputGroup,
 	InputRightElement,
-	Stack,
 	Link as ChakraLink,
+	Stack,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { Link as ReactRouterLink } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
+import GithubIcon from "../assets/icons/GithubIcon.jsx";
 
 const Login = () => {
 	const [showPass, setShowPass] = useState(false);
@@ -63,6 +64,13 @@ const Login = () => {
 					</InputGroup>
 					<Button colorScheme="teal" type="submit">
 						Login
+					</Button>
+					<Button
+						as={ReactRouterLink}
+						to={`${import.meta.env.VITE_AUTH_SERVICE_URI}/login/oauth2/github`}
+						leftIcon={<GithubIcon boxSize={6} />}
+					>
+						Login with GitHub
 					</Button>
 					<ChakraLink
 						textAlign="center"

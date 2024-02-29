@@ -1,7 +1,9 @@
+import { Fragment, useState } from "react";
+import PencilSquareIcon from "../../../assets/icons/PencilSquareIcon.jsx";
 import {
 	Button,
+	IconButton,
 	Input,
-	MenuItem,
 	Modal,
 	ModalBody,
 	ModalCloseButton,
@@ -9,27 +11,26 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
+	Tooltip,
 	useDisclosure,
 } from "@chakra-ui/react";
-import { Fragment, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "../../../lib/axios.js";
 
-const NewFolderButton = ({ folderId }) => {
+const RenameFolderButton = ({ folder, parentFolderId }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [folderName, setFolderName] = useState("");
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation({
 		mutationFn: async (folderName) => {
-			await apiInstance.post("/api/v1/folders", {
+			await apiInstance.patch(`/api/v1/folders/${folder.id}`, {
 				folderName,
-				parentFolderId: folderId,
 			});
 		},
 		onSuccess: () =>
 			queryClient.invalidateQueries({
-				queryKey: ["folder", folderId, "contents"],
+				queryKey: ["folder", parentFolderId, "contents"],
 			}),
 	});
 
@@ -39,6 +40,11 @@ const NewFolderButton = ({ folderId }) => {
 		modalCloseHandler();
 	};
 
+	const modalOpenHandler = () => {
+		onOpen();
+		setFolderName(folder.folderName);
+	};
+
 	const modalCloseHandler = () => {
 		setFolderName("");
 		onClose();
@@ -46,11 +52,18 @@ const NewFolderButton = ({ folderId }) => {
 
 	return (
 		<Fragment>
-			<MenuItem onClick={onOpen}>Add a new folder</MenuItem>
+			<Tooltip label="Rename Folder" hasArrow>
+				<IconButton
+					icon={<PencilSquareIcon boxSize={5} />}
+					mr={3}
+					colorScheme="blue"
+					onClick={modalOpenHandler}
+				/>
+			</Tooltip>
 			<Modal isOpen={isOpen} onClose={modalCloseHandler}>
 				<ModalOverlay />
 				<ModalContent as="form" onSubmit={formSubmitHandler}>
-					<ModalHeader>New Folder</ModalHeader>
+					<ModalHeader>Rename Folder</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody>
 						<Input
@@ -62,7 +75,7 @@ const NewFolderButton = ({ folderId }) => {
 					</ModalBody>
 					<ModalFooter>
 						<Button mr={3} colorScheme="teal" type="submit">
-							Create
+							Rename
 						</Button>
 						<Button onClick={modalCloseHandler}>Cancel</Button>
 					</ModalFooter>
@@ -72,4 +85,4 @@ const NewFolderButton = ({ folderId }) => {
 	);
 };
 
-export default NewFolderButton;
+export default RenameFolderButton;

@@ -16,7 +16,9 @@ import { Link as ReactRouterLink } from "react-router-dom";
 import FileIcon from "../../assets/icons/FileIcon";
 import FolderIcon from "../../assets/icons/FolderIcon";
 import { apiInstance } from "../../lib/axios";
-import prettyBytes from 'pretty-bytes';
+import prettyBytes from "pretty-bytes";
+import RenameFolderButton from "./FolderContents/RenameFolderButton.jsx";
+import DeleteFolderButton from "./FolderContents/DeleteFolderButton.jsx";
 
 const epochToDateString = (epoch) => {
 	const date = new Date(epoch);
@@ -28,7 +30,7 @@ const FolderContents = ({ folderId }) => {
 		queryKey: ["folder", folderId, "contents"],
 		queryFn: async () => {
 			const { data: folderContents } = await apiInstance.get(
-				`/api/v1/folders/${folderId}/contents`
+				`/api/v1/folders/${folderId}/contents`,
 			);
 			return folderContents;
 		},
@@ -55,6 +57,7 @@ const FolderContents = ({ folderId }) => {
 						<Th>Type</Th>
 						<Th>Created At</Th>
 						<Th>Size</Th>
+						<Th>Actions</Th>
 					</Tr>
 				</Thead>
 				<Tbody>
@@ -76,6 +79,17 @@ const FolderContents = ({ folderId }) => {
 									<Td>
 										{epochToDateString(folder.createdAt)}
 									</Td>
+									<Td></Td>
+									<Td>
+										<RenameFolderButton
+											folder={folder}
+											parentFolderId={folderId}
+										/>
+										<DeleteFolderButton
+											folder={folder}
+											parentFolderId={folderId}
+										/>
+									</Td>
 								</Tr>
 							))}
 							{data.files.map((file) => (
@@ -94,7 +108,10 @@ const FolderContents = ({ folderId }) => {
 									</Td>
 									<Td>File</Td>
 									<Td>{epochToDateString(file.createdAt)}</Td>
-									<Td>{file.sizeInBytes && prettyBytes(file.sizeInBytes)}</Td>
+									<Td>
+										{file.sizeInBytes &&
+											prettyBytes(file.sizeInBytes)}
+									</Td>
 								</Tr>
 							))}
 						</Fragment>

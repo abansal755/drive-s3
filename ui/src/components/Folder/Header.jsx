@@ -15,6 +15,7 @@ import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
 import { Link as ReactRouterLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiInstance } from "../../lib/axios";
+import NewFolderButton from "./Header/NewFolderButton.jsx";
 
 const Header = ({ folderId }) => {
 	const { data, isSuccess } = useQuery({
@@ -40,7 +41,7 @@ const Header = ({ folderId }) => {
 				{isSuccess &&
 					data.ancestors.map((ancestor, idx) => (
 						<BreadcrumbItem key={ancestor.id}>
-							{!ancestor.folderName && (
+							{!ancestor.parentFolderId && (
 								<Avatar
 									name={`${data.rootFolderOwner.firstName} ${data.rootFolderOwner.lastName}`}
 									size="sm"
@@ -61,7 +62,7 @@ const Header = ({ folderId }) => {
 											: "normal"
 									}
 								>
-									{!!ancestor.folderName
+									{ancestor.parentFolderId
 										? ancestor.folderName
 										: data.rootFolderOwner.email}
 								</Text>
@@ -75,7 +76,7 @@ const Header = ({ folderId }) => {
 				</MenuButton>
 				<MenuList>
 					<MenuItem>Upload a new file</MenuItem>
-					<MenuItem>Add a new folder</MenuItem>
+					<NewFolderButton folderId={folderId} />
 				</MenuList>
 			</Menu>
 		</Box>

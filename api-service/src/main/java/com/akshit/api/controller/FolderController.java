@@ -40,6 +40,14 @@ public class FolderController {
         return folderService.getFolderAncestors(folderId, user);
     }
 
+    @GetMapping("{folderId}/size")
+    public FolderSizeResponse getFolderSize(
+            @PathVariable Long folderId,
+            @AuthenticationPrincipal User user
+    ) {
+        return folderService.getFolderSize(folderId, user);
+    }
+
     @PostMapping("")
     public Folder createFolder(
             @Valid @RequestBody FolderCreateRequest folderCreateRequest,

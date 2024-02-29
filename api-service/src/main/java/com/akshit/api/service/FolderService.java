@@ -156,6 +156,17 @@ public class FolderService {
         });
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Long getFolderSize(FolderEntity folder){
+        Long[] size = { 0L };
+        breadthFirstSearch(folder, (currentFolder) -> {
+            List<FileEntity> childFiles = getChildFiles(currentFolder);
+            childFiles.forEach(file -> size[0]+= file.getSizeInBytes());
+            return true;
+        });
+        return size[0];
+    }
+
     public void folderExistenceRequiredValidation(FolderEntity folder){
         if(folder == null)
             throw new ApiException("Folder not found", HttpStatus.NOT_FOUND);
@@ -297,6 +308,20 @@ public class FolderService {
                                 .toList()
                 )
                 .rootFolderOwner(owner)
+                .build();
+    }
+
+    @Transactional
+    public FolderSizeResponse getFolderSize(Long folderId, User user){
+        FolderEntity folder = folderRepository.findFolderEntityById(folderId);
+        folderExistenceRequiredValidation(folder);
+
+        PermissionType permission = getFolderPermissionForUser(folder, user);
+        folderReadPermissionRequiredValidation(permission);
+
+        return FolderSizeResponse
+                .builder()
+                .sizeInBytes(getFolderSize(folder))
                 .build();
     }
 }

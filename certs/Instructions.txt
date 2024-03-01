@@ -1,0 +1,3 @@
+https://brytecode.be/articles/using-http-2-in-your-spring-boot-application/
+https://stackoverflow.com/questions/11617210/how-to-properly-import-a-selfsigned-certificate-into-java-keystore-that-is-avail
+https://stackoverflow.com/questions/69417788/vite-https-on-localhost

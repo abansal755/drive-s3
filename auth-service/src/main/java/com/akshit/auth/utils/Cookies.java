@@ -27,6 +27,9 @@ public class Cookies {
                 .from("access_token", token)
                 .path("/")
                 .maxAge(ACCESS_EXPIRE_AFTER_MILLIS /1000)
+                .secure(true)
+                .httpOnly(true)
+                .sameSite("Lax")
                 .build();
     }
 
@@ -35,6 +38,9 @@ public class Cookies {
                 .from("refresh_token", token)
                 .path("/")
                 .maxAge(REFRESH_EXPIRE_AFTER_MILLIS/1000)
+                .secure(true)
+                .httpOnly(true)
+                .sameSite("Lax")
                 .build();
     }
 }

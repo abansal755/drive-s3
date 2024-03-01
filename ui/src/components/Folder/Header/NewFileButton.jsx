@@ -47,18 +47,20 @@ const NewFileButton = ({ folderId }) => {
 				extension,
 				parentFolderId: folderId,
 			});
-			console.log("upload id: ", uploadId);
 			await fetch(
-				`${import.meta.env.VITE_API_SERVICE_URI}/api/uploads/${uploadId}`,
+				`${import.meta.env.VITE_API_SERVICE_URI}/api/v1/uploads/${uploadId}`,
 				{
 					method: "PUT",
 					body: file.stream(),
 					duplex: "half",
+					credentials: "include",
 				},
 			);
 		},
-		onSuccess: () =>
-			queryClient.invalidateQueries("folder", folderId, "contents"),
+		onSuccess: () => {
+			queryClient.invalidateQueries("folder", folderId, "contents");
+			modalCloseHandler();
+		},
 	});
 
 	useEffect(() => {

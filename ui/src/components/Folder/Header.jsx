@@ -16,6 +16,7 @@ import { Link as ReactRouterLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiInstance } from "../../lib/axios";
 import NewFolderButton from "./Header/NewFolderButton.jsx";
+import NewFileButton from "./Header/NewFileButton.jsx";
 
 const Header = ({ folderId }) => {
 	const { data, isSuccess } = useQuery({
@@ -75,7 +76,7 @@ const Header = ({ folderId }) => {
 					New
 				</MenuButton>
 				<MenuList>
-					<MenuItem>Upload a new file</MenuItem>
+					<NewFileButton folderId={folderId} />
 					<NewFolderButton folderId={folderId} />
 				</MenuList>
 			</Menu>

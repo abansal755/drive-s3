@@ -17,7 +17,8 @@ const FileRow = ({ file, parentFolderId }) => {
 				>
 					<FileIcon boxSize={5} mr={1} />
 					<Text>
-						{file.name}.{file.extension}
+						{file.name}
+						{file.extension && `.${file.extension}`}
 					</Text>
 				</ChakraLink>
 			</Td>

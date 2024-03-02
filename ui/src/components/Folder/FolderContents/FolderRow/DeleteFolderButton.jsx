@@ -24,10 +24,12 @@ const DeleteFolderButton = ({ folder, parentFolderId }) => {
 		mutationFn: async () => {
 			await apiInstance.delete(`/api/v1/folders/${folder.id}`);
 		},
-		onSuccess: () =>
+		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["folder", parentFolderId, "contents"],
-			}),
+			});
+			onClose();
+		},
 	});
 
 	return (
@@ -39,11 +41,15 @@ const DeleteFolderButton = ({ folder, parentFolderId }) => {
 					onClick={onOpen}
 				/>
 			</Tooltip>
-			<Modal isOpen={isOpen} onClose={onClose}>
+			<Modal
+				isOpen={isOpen}
+				onClose={onClose}
+				closeOnOverlayClick={false}
+			>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Delete Folder</ModalHeader>
-					<ModalCloseButton />
+					<ModalCloseButton isDisabled={mutation.isPending} />
 					<ModalBody>
 						Are you sure you want to delete this folder?
 					</ModalBody>
@@ -53,10 +59,17 @@ const DeleteFolderButton = ({ folder, parentFolderId }) => {
 							colorScheme="red"
 							type="submit"
 							onClick={mutation.mutate}
+							isLoading={mutation.isPending}
+							loadingText="Deleting"
 						>
 							Delete
 						</Button>
-						<Button onClick={onClose}>Cancel</Button>
+						<Button
+							onClick={onClose}
+							isDisabled={mutation.isPending}
+						>
+							Cancel
+						</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>

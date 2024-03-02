@@ -28,16 +28,17 @@ const RenameFolderButton = ({ folder, parentFolderId }) => {
 				folderName,
 			});
 		},
-		onSuccess: () =>
+		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["folder", parentFolderId, "contents"],
-			}),
+			});
+			onClose();
+		},
 	});
 
 	const formSubmitHandler = (e) => {
 		e.preventDefault();
 		mutation.mutate(folderName);
-		onClose();
 	};
 
 	const modalOpenHandler = () => {
@@ -55,24 +56,40 @@ const RenameFolderButton = ({ folder, parentFolderId }) => {
 					onClick={modalOpenHandler}
 				/>
 			</Tooltip>
-			<Modal isOpen={isOpen} onClose={onClose}>
+			<Modal
+				isOpen={isOpen}
+				onClose={onClose}
+				closeOnOverlayClick={false}
+			>
 				<ModalOverlay />
 				<ModalContent as="form" onSubmit={formSubmitHandler}>
 					<ModalHeader>Rename Folder</ModalHeader>
-					<ModalCloseButton />
+					<ModalCloseButton isDisabled={mutation.isPending} />
 					<ModalBody>
 						<Input
 							placeholder="Folder Name"
 							variant="filled"
 							value={folderName}
 							onChange={(e) => setFolderName(e.target.value)}
+							isDisabled={mutation.isPending}
 						/>
 					</ModalBody>
 					<ModalFooter>
-						<Button mr={3} colorScheme="teal" type="submit">
+						<Button
+							mr={3}
+							colorScheme="teal"
+							type="submit"
+							isLoading={mutation.isPending}
+							loadingText="Renaming"
+						>
 							Rename
 						</Button>
-						<Button onClick={onClose}>Cancel</Button>
+						<Button
+							onClick={onClose}
+							isDisabled={mutation.isPending}
+						>
+							Cancel
+						</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>

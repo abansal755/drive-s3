@@ -85,19 +85,27 @@ const NewFileButton = ({ folderId }) => {
 		setFile(null);
 	};
 
-	const disabled = !file;
+	const disabled = !file || mutation.isPending;
 
 	return (
 		<Fragment>
 			<MenuItem onClick={onOpen}>Upload a new file</MenuItem>
-			<Modal isOpen={isOpen} onClose={modalCloseHandler}>
+			<Modal
+				isOpen={isOpen}
+				onClose={modalCloseHandler}
+				closeOnOverlayClick={false}
+			>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>New File</ModalHeader>
-					<ModalCloseButton />
+					<ModalCloseButton isDisabled={mutation.isPending} />
 					<ModalBody>
 						<Stack>
-							<input type="file" onChange={fileChangeHandler} />
+							<input
+								type="file"
+								onChange={fileChangeHandler}
+								disabled={mutation.isPending}
+							/>
 							<Box display="flex" alignItems="flex-end">
 								<Input
 									placeholder="Name"
@@ -128,10 +136,17 @@ const NewFileButton = ({ folderId }) => {
 							type="submit"
 							isDisabled={disabled}
 							onClick={() => mutation.mutate({ name, extension })}
+							isLoading={mutation.isPending}
+							loadingText="Uploading"
 						>
 							Upload
 						</Button>
-						<Button onClick={modalCloseHandler}>Cancel</Button>
+						<Button
+							onClick={modalCloseHandler}
+							isDisabled={mutation.isPending}
+						>
+							Cancel
+						</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>

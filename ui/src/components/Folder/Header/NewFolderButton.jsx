@@ -27,16 +27,17 @@ const NewFolderButton = ({ folderId }) => {
 				parentFolderId: folderId,
 			});
 		},
-		onSuccess: () =>
+		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["folder", folderId, "contents"],
-			}),
+			});
+			modalCloseHandler();
+		},
 	});
 
 	const formSubmitHandler = (e) => {
 		e.preventDefault();
 		mutation.mutate(folderName);
-		modalCloseHandler();
 	};
 
 	const modalCloseHandler = () => {
@@ -47,24 +48,40 @@ const NewFolderButton = ({ folderId }) => {
 	return (
 		<Fragment>
 			<MenuItem onClick={onOpen}>Add a new folder</MenuItem>
-			<Modal isOpen={isOpen} onClose={modalCloseHandler}>
+			<Modal
+				isOpen={isOpen}
+				onClose={modalCloseHandler}
+				closeOnOverlayClick={false}
+			>
 				<ModalOverlay />
 				<ModalContent as="form" onSubmit={formSubmitHandler}>
 					<ModalHeader>New Folder</ModalHeader>
-					<ModalCloseButton />
+					<ModalCloseButton isDisabled={mutation.isPending} />
 					<ModalBody>
 						<Input
 							placeholder="Folder Name"
 							variant="filled"
 							value={folderName}
 							onChange={(e) => setFolderName(e.target.value)}
+							isDisabled={mutation.isPending}
 						/>
 					</ModalBody>
 					<ModalFooter>
-						<Button mr={3} colorScheme="teal" type="submit">
+						<Button
+							mr={3}
+							colorScheme="teal"
+							type="submit"
+							isLoading={mutation.isPending}
+							loadingText="Creating"
+						>
 							Create
 						</Button>
-						<Button onClick={modalCloseHandler}>Cancel</Button>
+						<Button
+							onClick={modalCloseHandler}
+							isDisabled={mutation.isPending}
+						>
+							Cancel
+						</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>

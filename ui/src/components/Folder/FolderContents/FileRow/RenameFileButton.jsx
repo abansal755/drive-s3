@@ -30,16 +30,17 @@ const RenameFileButton = ({ file, parentFolderId }) => {
 				extension,
 			});
 		},
-		onSuccess: () =>
+		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["folder", parentFolderId, "contents"],
-			}),
+			});
+			onClose();
+		},
 	});
 
 	const formSubmitHandler = (e) => {
 		e.preventDefault();
 		mutation.mutate({ name, extension });
-		onClose();
 	};
 
 	const modalOpenHandler = () => {
@@ -58,11 +59,15 @@ const RenameFileButton = ({ file, parentFolderId }) => {
 					onClick={modalOpenHandler}
 				/>
 			</Tooltip>
-			<Modal isOpen={isOpen} onClose={onClose}>
+			<Modal
+				isOpen={isOpen}
+				onClose={onClose}
+				closeOnOverlayClick={false}
+			>
 				<ModalOverlay />
 				<ModalContent as="form" onSubmit={formSubmitHandler}>
 					<ModalHeader>Rename File</ModalHeader>
-					<ModalCloseButton />
+					<ModalCloseButton isDisabled={mutation.isPending} />
 					<ModalBody display="flex" alignItems="flex-end">
 						<Input
 							placeholder="Name"
@@ -70,6 +75,7 @@ const RenameFileButton = ({ file, parentFolderId }) => {
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							mr={2}
+							isDisabled={mutation.isPending}
 						/>
 						.
 						<Input
@@ -78,13 +84,25 @@ const RenameFileButton = ({ file, parentFolderId }) => {
 							ml={2}
 							value={extension}
 							onChange={(e) => setExtension(e.target.value)}
+							isDisabled={mutation.isPending}
 						/>
 					</ModalBody>
 					<ModalFooter>
-						<Button mr={3} colorScheme="teal" type="submit">
+						<Button
+							mr={3}
+							colorScheme="teal"
+							type="submit"
+							isLoading={mutation.isPending}
+							loadingText="Renaming"
+						>
 							Rename
 						</Button>
-						<Button onClick={onClose}>Cancel</Button>
+						<Button
+							onClick={onClose}
+							isDisabled={mutation.isPending}
+						>
+							Cancel
+						</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>

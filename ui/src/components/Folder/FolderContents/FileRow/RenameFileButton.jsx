@@ -57,6 +57,7 @@ const RenameFileButton = ({ file, parentFolderId }) => {
 					mr={3}
 					colorScheme="blue"
 					onClick={modalOpenHandler}
+					size="sm"
 				/>
 			</Tooltip>
 			<Modal

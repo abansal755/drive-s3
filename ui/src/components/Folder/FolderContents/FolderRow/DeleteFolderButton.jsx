@@ -39,6 +39,7 @@ const DeleteFolderButton = ({ folder, parentFolderId }) => {
 					icon={<DeleteIcon boxSize={5} />}
 					colorScheme="blue"
 					onClick={onOpen}
+					size="sm"
 				/>
 			</Tooltip>
 			<Modal

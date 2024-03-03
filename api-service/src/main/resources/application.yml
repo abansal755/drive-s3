@@ -4,12 +4,12 @@ server:
     enabled: true
   ssl:
     key-store-type: PKCS12
-    key-store: C:\Users\Akshit\Documents\Java\drive-s3\certs\localhost.p12
+    key-store: C:\Users\akshi\Documents\Java Projects\Drive-S3\certs\localhost.p12
     key-store-password: changeit
     key-alias: localhost
 auth-service:
   uri: https://localhost:8080
-  admin-access-token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGktc2VydmljZSIsImlhdCI6MTcwOTEzNDcyNCwiZXhwIjoyMDI0NDk0NzI0fQ.XwzixpNYZS_p_3wn-_tvhwBYz03rVf2JmIjRj0TBwuI
+  admin-access-token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGktc2VydmljZSIsImlhdCI6MTcwOTQ2OTU5MywiZXhwIjoyMDI0ODI5NTkzfQ.bUsVvykvx7VFGhD352gFUBb7RwkV2vPXJMxTnFlKofk
 spring:
   jpa:
     hibernate:
@@ -23,4 +23,4 @@ spring:
     allow-circular-references: true
 s3:
   bucket-name: akshit-drive-demo
-temp-file-storage: C:\Users\Akshit\.api-service
+temp-file-storage: C:\Users\akshi\.api-service

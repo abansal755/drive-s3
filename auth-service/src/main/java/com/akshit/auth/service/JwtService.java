@@ -33,7 +33,7 @@ public class JwtService {
 //
 //    @PostConstruct
 //    public void init(){
-//        Token token = generateUserToken(userService.findUserById(102L), 1000L * 60 * 60 * 24 * 365 * 10);
+//        Token token = generateUserToken(userService.findUserById(2L), 1000L * 60 * 60 * 24 * 365 * 10);
 //        System.out.println(token.getValue());
 //    }
 

@@ -34,8 +34,8 @@ export const AuthContextProvider = ({ children }) => {
 				try { authInstance.post("/api/v1/token") }
 				catch(err) {
 					console.error(err);
+					clearInterval(id);
 					logoutMutation.mutate();
-					clearTimeout(id);
 				}
 			},
 			expireAt - 10 * 1000 - Date.now()

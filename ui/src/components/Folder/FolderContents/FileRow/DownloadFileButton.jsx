@@ -9,9 +9,11 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	Progress,
+	Text,
 	Tooltip,
 	useDisclosure,
 } from "@chakra-ui/react";
+import prettyBytes from "pretty-bytes";
 import { Fragment, useState } from "react";
 
 const getSuggestedNameFromFile = (file) => {
@@ -41,7 +43,7 @@ const DownloadFileButton = ({ file }) => {
 			while (true) {
 				const { value, done } = await reader.read();
 				if (done) break;
-				setBytesDownloaded(prev => prev + value.length);
+				setBytesDownloaded((prev) => prev + value.length);
 				console.log(bytesDownloaded, file.sizeInBytes);
 				await writer.ready;
 				await writer.write(value);
@@ -72,10 +74,16 @@ const DownloadFileButton = ({ file }) => {
 				<ModalContent>
 					<ModalHeader>Downloading File</ModalHeader>
 					<ModalBody>
-						<Progress value={bytesDownloaded / file.sizeInBytes} />
+						<Progress
+							value={(bytesDownloaded / file.sizeInBytes) * 100}
+						/>
+						<Text mt={2}>
+							Downloaded {prettyBytes(bytesDownloaded)} out of{" "}
+							{prettyBytes(file.sizeInBytes)}
+						</Text>
 					</ModalBody>
 					<ModalFooter>
-						<Button>Abort</Button>
+						<Button colorScheme="red">Abort</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>

@@ -1,10 +1,11 @@
 import FileIcon from "../../../assets/icons/FileIcon.jsx";
-import { Tr, Td, Link as ChakraLink, Text } from "@chakra-ui/react";
+import { Tr, Td, Link as ChakraLink, Text, HStack } from "@chakra-ui/react";
 import { Link as ReactRouterLink } from "react-router-dom";
 import prettyBytes from "pretty-bytes";
 import epochToDateString from "../../../utils/epochToDateString.js";
 import RenameFileButton from "./FileRow/RenameFileButton.jsx";
 import DeleteFileButton from "./FileRow/DeleteFileButton.jsx";
+import DownloadFileButton from "./FileRow/DownloadFileButton.jsx";
 
 const FileRow = ({ file, parentFolderId }) => {
 	return (
@@ -26,8 +27,17 @@ const FileRow = ({ file, parentFolderId }) => {
 			<Td>{epochToDateString(file.createdAt)}</Td>
 			<Td>{file.sizeInBytes && prettyBytes(file.sizeInBytes)}</Td>
 			<Td>
-				<RenameFileButton file={file} parentFolderId={parentFolderId} />
-				<DeleteFileButton file={file} parentFolderId={parentFolderId} />
+				<HStack spacing={3}>
+					<RenameFileButton
+						file={file}
+						parentFolderId={parentFolderId}
+					/>
+					<DeleteFileButton
+						file={file}
+						parentFolderId={parentFolderId}
+					/>
+					<DownloadFileButton file={file} />
+				</HStack>
 			</Td>
 		</Tr>
 	);

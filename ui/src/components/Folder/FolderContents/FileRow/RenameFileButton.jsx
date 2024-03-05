@@ -54,7 +54,6 @@ const RenameFileButton = ({ file, parentFolderId }) => {
 			<Tooltip label="Rename File" hasArrow>
 				<IconButton
 					icon={<PencilSquareIcon boxSize={5} />}
-					mr={3}
 					colorScheme="blue"
 					onClick={modalOpenHandler}
 					size="sm"

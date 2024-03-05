@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
 
 @Service
 public class S3Service {
@@ -22,13 +23,13 @@ public class S3Service {
     @Value("${s3.bucket-name}")
     private String S3_BUCKET_NAME;
 
-    public void putS3Object(String s3ObjectKey, String path){
+    public void putS3Object(String s3ObjectKey, InputStream inputStream, long contentLength){
         PutObjectRequest putObjectRequest = PutObjectRequest
                 .builder()
                 .bucket(S3_BUCKET_NAME)
                 .key(s3ObjectKey)
                 .build();
-        s3Client.putObject(putObjectRequest, RequestBody.fromFile(new File(path)));
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
     }
 
     public BufferedInputStream getS3Object(String s3ObjectKey){

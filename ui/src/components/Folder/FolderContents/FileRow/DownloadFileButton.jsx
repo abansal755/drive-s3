@@ -25,6 +25,12 @@ const getSuggestedNameFromFile = (file) => {
 const DownloadFileButton = ({ file }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [bytesDownloaded, setBytesDownloaded] = useState(0);
+
+	const modalCloseHandler = () => {
+		onClose();
+		setBytesDownloaded(0);
+	};
+
 	const downloadBtnClickHandler = async () => {
 		try {
 			const fileHandle = await window.showSaveFilePicker({
@@ -44,12 +50,11 @@ const DownloadFileButton = ({ file }) => {
 				const { value, done } = await reader.read();
 				if (done) break;
 				setBytesDownloaded((prev) => prev + value.length);
-				console.log(bytesDownloaded, file.sizeInBytes);
 				await writer.ready;
 				await writer.write(value);
 			}
 			writer.close();
-			onClose();
+			modalCloseHandler();
 		} catch (err) {
 			console.error(err);
 		}
@@ -67,7 +72,7 @@ const DownloadFileButton = ({ file }) => {
 			</Tooltip>
 			<Modal
 				isOpen={isOpen}
-				onClose={onClose}
+				onClose={modalCloseHandler}
 				closeOnOverlayClick={false}
 			>
 				<ModalOverlay />

@@ -21,6 +21,9 @@ spring:
     password: root
   main:
     allow-circular-references: true
+  mvc:
+    async:
+      request-timeout: -1
 s3:
   bucket-name: akshit-drive-demo
 temp-file-storage: C:\Users\akshi\.api-service

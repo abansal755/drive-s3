@@ -46,9 +46,6 @@ public class FileService {
     @Autowired
     private S3Service s3Service;
 
-    @Autowired
-    private TempStorageService tempStorageService;
-
     @Transactional(propagation = Propagation.MANDATORY)
     public PermissionType getFilePermissionForUser(FileEntity file, User user){
         PermissionEntity permission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(file.getId(), ResourceType.FILE, user.getId());
@@ -124,23 +121,17 @@ public class FileService {
         PermissionType permission = getFilePermissionForUser(file, user);
         fileReadPermissionRequiredValidation(permission);
 
-        // download file from s3
         String fileName = file.getId().toString();
-        BufferedInputStream inputStream = s3Service.getS3Object(fileName);
-        tempStorageService.downloadStreamToFile(inputStream, fileName);
-        inputStream.close();
 
         return (OutputStream outputStream) -> {
-                    // read the downloaded file and stream it as response body
                     BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-                    BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(tempStorageService.getPath(fileName)));
+                    BufferedInputStream inputStream = s3Service.getS3Object(fileName);
 
                     int b;
-                    while((b = bufferedInputStream.read()) != -1)
+                    while((b = inputStream.read()) != -1)
                         bufferedOutputStream.write(b);
                     bufferedOutputStream.flush();
-                    bufferedInputStream.close();
-                    tempStorageService.deleteFileIfExists(fileName);
+                    inputStream.close();
                 };
     }
 

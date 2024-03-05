@@ -54,6 +54,9 @@ const NewFileButton = ({ folderId }) => {
 					body: file.stream(),
 					duplex: "half",
 					credentials: "include",
+					headers: {
+						"x-content-length": file.size,
+					},
 				},
 			);
 		},

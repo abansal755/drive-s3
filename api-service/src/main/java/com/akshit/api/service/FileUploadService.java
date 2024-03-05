@@ -37,9 +37,6 @@ public class FileUploadService {
     @Autowired
     private S3Service s3Service;
 
-    @Autowired
-    private TempStorageService tempStorageService;
-
     public void fileUploadExistenceRequiredValidation(FileUploadEntity fileUpload){
         if(fileUpload == null)
             throw new ApiException("Upload ID not found", HttpStatus.NOT_FOUND);
@@ -77,10 +74,9 @@ public class FileUploadService {
         // upload
         FileEntity file = fileRepository.findFileEntityById(fileUpload.getFileId());
         String fileName = file.getId().toString();
+        long contentLength = Long.parseLong(request.getHeader("x-content-length"));
         BufferedInputStream inputStream = new BufferedInputStream(request.getInputStream());
-        tempStorageService.downloadStreamToFile(inputStream, fileName);
-        s3Service.putS3Object(fileName, tempStorageService.getPath(fileName));
-        tempStorageService.deleteFileIfExists(fileName);
+        s3Service.putS3Object(fileName, inputStream, contentLength);
 
         // update status to uploaded
         fileUpload.setUploadStatus(UploadStatus.UPLOADED);

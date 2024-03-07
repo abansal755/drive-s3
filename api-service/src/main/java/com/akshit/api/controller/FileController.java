@@ -27,14 +27,6 @@ public class FileController {
         return fileService.createFile(fileCreateRequest, user);
     }
 
-    @GetMapping("{fileId}/download")
-    public StreamingResponseBody downloadFile(
-            @PathVariable Long fileId,
-            @AuthenticationPrincipal User user) throws IOException
-    {
-        return fileService.downloadFile(fileId, user);
-    }
-
     @PatchMapping("{fileId}")
     public File modifyFile(
             @RequestBody FileUpdateRequest fileUpdateRequest,

@@ -113,29 +113,6 @@ public class FileService {
     }
 
     @Transactional
-    public StreamingResponseBody downloadFile(Long fileId, User user) throws IOException {
-        // validations
-        FileEntity file = fileRepository.findFileEntityById(fileId);
-        fileExistenceRequiredValidation(file);
-
-        PermissionType permission = getFilePermissionForUser(file, user);
-        fileReadPermissionRequiredValidation(permission);
-
-        String fileName = file.getId().toString();
-
-        return (OutputStream outputStream) -> {
-                    BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-                    BufferedInputStream inputStream = s3Service.getS3Object(fileName);
-
-                    int b;
-                    while((b = inputStream.read()) != -1)
-                        bufferedOutputStream.write(b);
-                    bufferedOutputStream.flush();
-                    inputStream.close();
-                };
-    }
-
-    @Transactional
     public com.akshit.api.model.File modifyFile(
             FileUpdateRequest fileUpdateRequest,
             Long fileId, User user)

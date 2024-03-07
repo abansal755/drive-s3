@@ -37,6 +37,8 @@ public class ExceptionHandlers {
 
     @ExceptionHandler
     public ResponseEntity<ExceptionResponse> apiException(ApiException exception){
+        System.err.println(getExceptionString(exception));
+        getExceptionStackStrace(exception).forEach(System.err::println);
         String message = "Something went wrong";
         if(exception.getMessage() != null)
             message = exception.getMessage();
@@ -58,6 +60,8 @@ public class ExceptionHandlers {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ExceptionResponse authenticationException(AuthenticationException authException){
+        System.err.println(getExceptionString(authException));
+        getExceptionStackStrace(authException).forEach(System.err::println);
         return ExceptionResponse
                 .builder()
                 .status(HttpStatus.UNAUTHORIZED)
@@ -70,6 +74,8 @@ public class ExceptionHandlers {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionResponse methodArgumentNotValidException(MethodArgumentNotValidException exception){
+        System.err.println(getExceptionString(exception));
+        getExceptionStackStrace(exception).forEach(System.err::println);
         return ExceptionResponse
                 .builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -87,6 +93,8 @@ public class ExceptionHandlers {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionResponse exception(Exception exception){
+        System.err.println(getExceptionString(exception));
+        getExceptionStackStrace(exception).forEach(System.err::println);
         return ExceptionResponse
                 .builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

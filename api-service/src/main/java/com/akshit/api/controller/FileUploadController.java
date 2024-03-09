@@ -21,20 +21,17 @@ public class FileUploadController {
     @Autowired
     private FileUploadService fileUploadService;
 
-    @GetMapping("{uploadId}")
-    public UploadStatusResponse getUploadStatus(
-            @PathVariable Long uploadId,
-            @AuthenticationPrincipal User user)
-    {
-        return fileUploadService.getUploadStatus(uploadId, user);
-    }
-
-    @PutMapping("{uploadId}")
+    @PutMapping("stream/{uploadId}")
     public void upload(
             HttpServletRequest request,
             @PathVariable Long uploadId,
             @AuthenticationPrincipal User user) throws IOException
     {
         fileUploadService.upload(request, uploadId, user);
+    }
+
+    @PatchMapping("abort/{uploadId}")
+    public void abort(@PathVariable Long uploadId, @AuthenticationPrincipal User user){
+        fileUploadService.abort(uploadId, user);
     }
 }

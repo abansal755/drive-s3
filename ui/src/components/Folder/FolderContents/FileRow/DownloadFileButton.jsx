@@ -33,6 +33,7 @@ const DownloadFileButton = ({ file }) => {
 		onClose();
 		setDownloadId(null);
 		setBytesDownloaded(0);
+		abortMutation.reset();
 	};
 
 	const downloadBtnClickHandler = async () => {
@@ -114,7 +115,7 @@ const DownloadFileButton = ({ file }) => {
 						/>
 						<Text mt={2}>
 							Downloaded {prettyBytes(bytesDownloaded)} out of{" "}
-							{prettyBytes(file.sizeInBytes)}
+							{file.sizeInBytes && prettyBytes(file.sizeInBytes)}
 						</Text>
 					</ModalBody>
 					<ModalFooter>

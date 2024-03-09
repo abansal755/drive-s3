@@ -13,9 +13,12 @@ import {
 	useDisclosure,
 	Stack,
 	Box,
+	Progress,
+	Text,
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "../../../lib/axios.js";
+import prettyBytes from "pretty-bytes";
 
 const getNameAndExtensionFromFullName = (fileName) => {
 	let name = "";
@@ -36,9 +39,11 @@ const NewFileButton = ({ folderId }) => {
 	const [name, setName] = useState("");
 	const [extension, setExtension] = useState("");
 	const [file, setFile] = useState(null);
+	const [uploadId, setUploadId] = useState(null);
+	const [bytesUploaded, setBytesUploaded] = useState(0);
 	const queryClient = useQueryClient();
 
-	const mutation = useMutation({
+	const uploadMutation = useMutation({
 		mutationFn: async ({ name, extension }) => {
 			const {
 				data: { uploadId },
@@ -47,11 +52,13 @@ const NewFileButton = ({ folderId }) => {
 				extension,
 				parentFolderId: folderId,
 			});
-			await fetch(
-				`${import.meta.env.VITE_API_SERVICE_URI}/api/v1/uploads/${uploadId}`,
+			setUploadId(uploadId);
+			const { readable, writable } = new TransformStream();
+			fetch(
+				`${import.meta.env.VITE_API_SERVICE_URI}/api/v1/uploads/stream/${uploadId}`,
 				{
 					method: "PUT",
-					body: file.stream(),
+					body: readable,
 					duplex: "half",
 					credentials: "include",
 					headers: {
@@ -59,6 +66,27 @@ const NewFileButton = ({ folderId }) => {
 					},
 				},
 			);
+
+			const writer = writable.getWriter();
+			const reader = file.stream().getReader();
+			while (true) {
+				const { value, done } = await reader.read();
+				if (done) break;
+				setBytesUploaded((prev) => prev + value.length);
+				await writer.ready;
+				await writer.write(value);
+			}
+			writer.close();
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries("folder", folderId, "contents");
+			modalCloseHandler();
+		},
+	});
+
+	const abortMutation = useMutation({
+		mutationFn: async () => {
+			await apiInstance.patch(`/api/v1/uploads/abort/${uploadId}`);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries("folder", folderId, "contents");
@@ -86,9 +114,13 @@ const NewFileButton = ({ folderId }) => {
 	const modalCloseHandler = () => {
 		onClose();
 		setFile(null);
+		setUploadId(null);
+		setBytesUploaded(0);
+		abortMutation.reset();
+		uploadMutation.reset();
 	};
 
-	const disabled = !file || mutation.isPending;
+	const disabled = !file || uploadMutation.isPending;
 
 	return (
 		<Fragment>
@@ -101,13 +133,13 @@ const NewFileButton = ({ folderId }) => {
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>New File</ModalHeader>
-					<ModalCloseButton isDisabled={mutation.isPending} />
+					<ModalCloseButton isDisabled={uploadMutation.isPending} />
 					<ModalBody>
 						<Stack>
 							<input
 								type="file"
 								onChange={fileChangeHandler}
-								disabled={mutation.isPending}
+								disabled={uploadMutation.isPending}
 							/>
 							<Box display="flex" alignItems="flex-end">
 								<Input
@@ -130,6 +162,19 @@ const NewFileButton = ({ folderId }) => {
 									isDisabled={disabled}
 								/>
 							</Box>
+							{uploadMutation.isPending && (
+								<Fragment>
+									<Progress
+										value={
+											(bytesUploaded / file.size) * 100
+										}
+									/>
+									<Text>
+										Uploaded {prettyBytes(bytesUploaded)}{" "}
+										out of {prettyBytes(file.size)}
+									</Text>
+								</Fragment>
+							)}
 						</Stack>
 					</ModalBody>
 					<ModalFooter>
@@ -138,17 +183,26 @@ const NewFileButton = ({ folderId }) => {
 							colorScheme="teal"
 							type="submit"
 							isDisabled={disabled}
-							onClick={() => mutation.mutate({ name, extension })}
-							isLoading={mutation.isPending}
+							onClick={() =>
+								uploadMutation.mutate({ name, extension })
+							}
+							isLoading={uploadMutation.isPending}
 							loadingText="Uploading"
 						>
 							Upload
 						</Button>
 						<Button
-							onClick={modalCloseHandler}
-							isDisabled={mutation.isPending}
+							onClick={abortMutation.mutate}
+							isLoading={
+								abortMutation.isPending ||
+								abortMutation.isSuccess
+							}
+							isDisabled={uploadMutation.isIdle}
+							colorScheme="red"
+							loadingText="Aborting"
+							type="button"
 						>
-							Cancel
+							Abort
 						</Button>
 					</ModalFooter>
 				</ModalContent>

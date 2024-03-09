@@ -9,12 +9,15 @@ import com.akshit.api.model.User;
 import com.akshit.api.repo.FileRepository;
 import com.akshit.api.repo.FileUploadRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.*;
@@ -37,6 +40,36 @@ public class FileUploadService {
     @Autowired
     private S3Service s3Service;
 
+    @Autowired
+    private EntityManager entityManager;
+
+    private void uploadFileFromInputStream(FileEntity file, Long fileUploadId, InputStream inputStream, long contentLength){
+        String fileName = file.getId().toString();
+        Thread thread = new Thread(() -> {
+            try {
+                while(true){
+                    entityManager.clear();
+                    UploadStatus status = fileUploadRepository.findFileUploadEntityById(fileUploadId).getUploadStatus();
+                    if(status == UploadStatus.ABORTED){
+                        inputStream.close();
+                        break;
+                    }
+                    Thread.sleep(3_000);
+                }
+            }
+            catch (Exception ex){
+                System.err.println(ex);
+            }
+        });
+        thread.start();
+        try {
+            s3Service.putS3Object(fileName, inputStream, contentLength);
+        }
+        finally {
+            thread.interrupt();
+        }
+    }
+
     public void fileUploadExistenceRequiredValidation(FileUploadEntity fileUpload){
         if(fileUpload == null)
             throw new ApiException("Upload ID not found", HttpStatus.NOT_FOUND);
@@ -45,17 +78,6 @@ public class FileUploadService {
     public void fileUploadMatchUserValidation(FileUploadEntity fileUpload, User user){
         if(!fileUpload.getUserId().equals(user.getId()))
             throw new ApiException("User doesn't have access to this upload ID", HttpStatus.FORBIDDEN);
-    }
-
-    public UploadStatusResponse getUploadStatus(Long uploadId,User user){
-        FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
-        fileUploadExistenceRequiredValidation(fileUpload);
-        fileUploadMatchUserValidation(fileUpload, user);
-
-        return UploadStatusResponse
-                        .builder()
-                        .uploadStatus(fileUpload.getUploadStatus())
-                        .build();
     }
 
     public void upload(HttpServletRequest request, Long uploadId, User user) throws IOException {
@@ -76,7 +98,7 @@ public class FileUploadService {
         String fileName = file.getId().toString();
         long contentLength = Long.parseLong(request.getHeader("x-content-length"));
         BufferedInputStream inputStream = new BufferedInputStream(request.getInputStream());
-        s3Service.putS3Object(fileName, inputStream, contentLength);
+        uploadFileFromInputStream(file, fileUpload.getId(), inputStream, contentLength);
 
         // update status to uploaded
         fileUpload.setUploadStatus(UploadStatus.UPLOADED);
@@ -88,5 +110,16 @@ public class FileUploadService {
         file.setS3ObjectKey(fileName);
         file.setSizeInBytes(size);
         fileRepository.save(file);
+    }
+
+    @Transactional
+    public void abort(Long uploadId, User user){
+        FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
+        fileUploadExistenceRequiredValidation(fileUpload);
+        fileUploadMatchUserValidation(fileUpload, user);
+
+        fileUpload.setUploadStatus(UploadStatus.ABORTED);
+        fileUploadRepository.save(fileUpload);
+        fileRepository.deleteById(fileUpload.getFileId());
     }
 }

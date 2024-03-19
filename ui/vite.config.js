@@ -8,10 +8,10 @@ export default defineConfig({
 	server: {
 		https: {
 			key: fs.readFileSync(
-				"C:\\Users\\akshi\\Documents\\Java Projects\\Drive-S3\\certs\\localhost.key",
+				"C:\\Users\\Akshit\\Documents\\Java\\drive-s3\\certs\\localhost.key",
 			),
 			cert: fs.readFileSync(
-				"C:\\Users\\akshi\\Documents\\Java Projects\\Drive-S3\\certs\\localhost.crt",
+				"C:\\Users\\Akshit\\Documents\\Java\\drive-s3\\certs\\localhost.crt",
 			),
 		},
 	},

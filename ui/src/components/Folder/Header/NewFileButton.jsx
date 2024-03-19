@@ -54,7 +54,7 @@ const NewFileButton = ({ folderId }) => {
 			});
 			setUploadId(uploadId);
 			const { readable, writable } = new TransformStream();
-			fetch(
+			const promise = fetch(
 				`${import.meta.env.VITE_API_SERVICE_URI}/api/v1/uploads/stream/${uploadId}`,
 				{
 					method: "PUT",
@@ -77,6 +77,7 @@ const NewFileButton = ({ folderId }) => {
 				await writer.write(value);
 			}
 			writer.close();
+			await promise;
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries("folder", folderId, "contents");

@@ -28,6 +28,9 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
+    @Autowired
+    private DelegatedAuthenticationEntryPoint delegatedAuthenticationEntryPoint;
+
     private AntPathRequestMatcher[] authenticatedRequestPaths = {
             new AntPathRequestMatcher("/api/v1/users", "GET")
     };
@@ -51,6 +54,9 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(delegatedAuthenticationEntryPoint)
+                )
                 .build();
     }
 

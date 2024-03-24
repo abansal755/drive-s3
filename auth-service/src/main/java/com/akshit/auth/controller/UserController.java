@@ -7,6 +7,7 @@ import com.akshit.auth.service.JwtService;
 import com.akshit.auth.service.UserService;
 import com.akshit.auth.utils.Cookies;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -41,12 +42,12 @@ public class UserController {
     }
 
     @PostMapping("")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody RegisterRequest registerRequest){
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest){
         return userService.registerUser(registerRequest);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> loginUser(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<UserResponse> loginUser(@Valid @RequestBody LoginRequest loginRequest){
         return userService.loginUser(loginRequest);
     }
 

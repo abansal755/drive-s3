@@ -2,16 +2,30 @@ package com.akshit.auth.service;
 
 import com.akshit.auth.entity.Role;
 import com.akshit.auth.entity.UserEntity;
+import com.akshit.auth.model.LoginRequest;
 import com.akshit.auth.model.RegisterRequest;
+import com.akshit.auth.model.Token;
+import com.akshit.auth.model.UserResponse;
 import com.akshit.auth.repo.UserRepository;
+import com.akshit.auth.utils.Cookies;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import static com.akshit.auth.utils.Cookies.getAccessTokenCookie;
+import static com.akshit.auth.utils.Cookies.getRefreshTokenCookie;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -21,6 +35,12 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -35,8 +55,25 @@ public class UserService implements UserDetailsService {
         return userRepository.findUserEntityById(userId);
     }
 
-    public UserEntity registerUser(RegisterRequest registerRequest){
-        UserEntity user = UserEntity
+    public UserEntity save(UserEntity user){
+        return userRepository.save(user);
+    }
+
+    public UserResponse getLoggedInUserDetails(HttpServletRequest request, UserEntity user){
+        String accessTokenValue = Cookies.readServletCookie(request, "access_token");
+        return UserResponse
+                .builderFromEntity(user)
+                .accessTokenExpireAtMillis(jwtService.extractExpiration(accessTokenValue).getTime())
+                .build();
+    }
+
+    public UserResponse getUserDetails(Long userId){
+        UserEntity user = findUserById(userId);
+        return UserResponse.fromEntity(user);
+    }
+
+    public ResponseEntity<UserResponse> registerUser(RegisterRequest registerRequest){
+        UserEntity user = userRepository.save(UserEntity
                 .builder()
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
@@ -45,11 +82,51 @@ public class UserService implements UserDetailsService {
                 .usernamePasswordRegistration(true)
                 .githubRegistration(false)
                 .role(Role.USER)
-                .build();
-        return userRepository.save(user);
+                .build());
+
+        Token accessToken = jwtService.generateAccessToken(user);
+        Token refreshToken = jwtService.generateRefreshToken(user);
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
+                .body(UserResponse.fromEntityAndAccessToken(user, accessToken));
     }
 
-    public UserEntity save(UserEntity user){
-        return userRepository.save(user);
+    public ResponseEntity<UserResponse> loginUser(LoginRequest loginRequest){
+        Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(
+                loginRequest.getEmail(),
+                loginRequest.getPassword());
+        authenticationManager.authenticate(authentication);
+
+        UserEntity user = findUserByEmail(loginRequest.getEmail());
+        Token accessToken = jwtService.generateAccessToken(user);
+        Token refreshToken = jwtService.generateRefreshToken(user);
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
+                .body(UserResponse.fromEntityAndAccessToken(user, accessToken));
+    }
+
+    public ResponseEntity<Void> logoutUser(){
+        ResponseCookie removeAccessTokenCookie = ResponseCookie
+                .from("access_token", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+        ResponseCookie removeRefreshTokenCookie = ResponseCookie
+                .from("refresh_token", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, removeAccessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, removeRefreshTokenCookie.toString())
+                .build();
     }
 }

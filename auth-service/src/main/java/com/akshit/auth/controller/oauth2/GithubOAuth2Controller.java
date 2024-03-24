@@ -29,43 +29,12 @@ import java.util.UUID;
 @RequestMapping("/login/oauth2/github")
 public class GithubOAuth2Controller {
 
-    @Value("${oauth2.client.github.client-id}")
-    private String githubClientId;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Value("${oauth2.client.github.redirect-uri}")
-    private String githubRedirectUri;
-
     @Autowired
     private GithubOAuth2Service githubOAuth2Service;
 
     @GetMapping("")
     public ResponseEntity<Void> authorizationEndpoint(HttpServletRequest request){
-        String referer = request.getHeader(HttpHeaders.REFERER);
-        String state = generateState(referer);
-
-        String location = UriComponentsBuilder
-                .fromHttpUrl("https://github.com/login/oauth/authorize")
-                .queryParam("client_id", githubClientId)
-                .queryParam("redirect_uri", githubRedirectUri)
-                .queryParam("state", state)
-                .encode()
-                .build()
-                .toString();
-        ResponseCookie stateCookie = ResponseCookie
-                .from("state", state)
-                .path("/")
-                .build();
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, location)
-                .header(HttpHeaders.SET_COOKIE, stateCookie.toString())
-                .build();
+        return githubOAuth2Service.authorizationEndpointHandler(request);
     }
 
     @GetMapping("/callback")
@@ -76,50 +45,6 @@ public class GithubOAuth2Controller {
             HttpServletRequest request
     ) throws Exception
     {
-        String stateCookie = Cookies.readServletCookie(request, "state");
-        if(stateCookie == null || !stateCookie.equals(state))
-            throw new Exception("Malformed state");
-
-        String referer = jwtService.extractClaim(state, Claims::getSubject);
-        ResponseCookie removeStateCookie = ResponseCookie
-                .from("state", "")
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        if(error != null)
-            return ResponseEntity
-                    .status(HttpStatus.FOUND)
-                    .header(HttpHeaders.LOCATION, (!referer.equals("")) ? referer : "http://localhost:8080")
-                    .header(HttpHeaders.SET_COOKIE, removeStateCookie.toString())
-                    .build();
-
-        GithubAccessTokenRequestResponse response = githubOAuth2Service.getGithubAccessTokenRequestResponse(code);
-        GithubGetUserRequestResponse githubUser = githubOAuth2Service.getGithubGetUserRequestResponse(response.getAccess_token());
-
-        UserEntity user = userService.findUserByEmail(githubUser.getEmail());
-        if(user == null){
-            user = UserEntity.fromGithubGetUserRequestResponse(githubUser);
-            userService.save(user);
-        }
-
-        Token accessToken = jwtService.generateAccessToken(user);
-        Token refreshToken = jwtService.generateRefreshToken(user);
-
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, (!referer.equals("")) ? referer : "http://localhost:8080")
-                .header(HttpHeaders.SET_COOKIE, Cookies.getAccessTokenCookie(accessToken.getValue()).toString())
-                .header(HttpHeaders.SET_COOKIE, Cookies.getRefreshTokenCookie(refreshToken.getValue()).toString())
-                .header(HttpHeaders.SET_COOKIE, removeStateCookie.toString())
-                .build();
-    }
-
-    private String generateState(String referer){
-        if(referer == null)
-            referer = "";
-        HashMap<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("salt", UUID.randomUUID().toString());
-        return jwtService.generateToken(referer, extraClaims);
+        return githubOAuth2Service.callbackEndpointHandler(code, state, error, request);
     }
 }

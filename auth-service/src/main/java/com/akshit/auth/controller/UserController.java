@@ -30,76 +30,28 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
     @GetMapping("")
     public UserResponse getLoggedInUserDetails(HttpServletRequest request, @AuthenticationPrincipal UserEntity user){
-        String accessTokenValue = Cookies.readServletCookie(request, "access_token");
-        return UserResponse
-                .builderFromEntity(user)
-                .accessTokenExpireAtMillis(jwtService.extractExpiration(accessTokenValue).getTime())
-                .build();
+        return userService.getLoggedInUserDetails(request, user);
     }
 
     @GetMapping("{userId}")
-    public UserResponse getUserDetails(HttpServletRequest request, @PathVariable Long userId){
-        UserEntity user = userService.findUserById(userId);
-        return UserResponse.fromEntity(user);
+    public UserResponse getUserDetails(@PathVariable Long userId){
+        return userService.getUserDetails(userId);
     }
 
     @PostMapping("")
     public ResponseEntity<UserResponse> registerUser(@RequestBody RegisterRequest registerRequest){
-        UserEntity user = userService.registerUser(registerRequest);
-
-        Token accessToken = jwtService.generateAccessToken(user);
-        Token refreshToken = jwtService.generateRefreshToken(user);
-
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
-                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
-                .body(UserResponse.fromEntityAndAccessToken(user, accessToken));
+        return userService.registerUser(registerRequest);
     }
 
     @PostMapping("/login")
     public ResponseEntity<UserResponse> loginUser(@RequestBody LoginRequest loginRequest){
-        Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(
-                loginRequest.getEmail(),
-                loginRequest.getPassword());
-        authenticationManager.authenticate(authentication);
-
-        UserEntity user = userService.findUserByEmail(loginRequest.getEmail());
-        Token accessToken = jwtService.generateAccessToken(user);
-        Token refreshToken = jwtService.generateRefreshToken(user);
-
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
-                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
-                .body(UserResponse.fromEntityAndAccessToken(user, accessToken));
+        return userService.loginUser(loginRequest);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logoutUser(){
-        ResponseCookie removeAccessTokenCookie = ResponseCookie
-                .from("access_token", "")
-                .path("/")
-                .maxAge(0)
-                .build();
-        ResponseCookie removeRefreshTokenCookie = ResponseCookie
-                .from("refresh_token", "")
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.SET_COOKIE, removeAccessTokenCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, removeRefreshTokenCookie.toString())
-                .build();
+        return userService.logoutUser();
     }
 }

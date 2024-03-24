@@ -19,7 +19,7 @@ public class UserResponse {
     private String lastName;
     private boolean usernamePasswordRegistration;
     private boolean githubRegistration;
-    private long accessTokenExpireAtMillis;
+    private Long accessTokenExpireAtMillis;
 
     public static UserResponse.UserResponseBuilder builderFromEntity(UserEntity user){
         return UserResponse

@@ -19,6 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static com.akshit.auth.config.AppConfig.ACCESS_EXPIRE_AFTER_MILLIS;
 import static com.akshit.auth.config.AppConfig.REFRESH_EXPIRE_AFTER_MILLIS;
 import static com.akshit.auth.utils.Cookies.getAccessTokenCookie;
@@ -54,5 +56,10 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logoutUser(){
         return userService.logoutUser();
+    }
+
+    @GetMapping("search")
+    public List<UserResponse> usersSearch(@RequestParam String v){
+        return userService.usersSearch(v);
     }
 }

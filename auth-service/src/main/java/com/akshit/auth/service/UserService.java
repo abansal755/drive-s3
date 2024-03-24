@@ -2,10 +2,7 @@ package com.akshit.auth.service;
 
 import com.akshit.auth.entity.Role;
 import com.akshit.auth.entity.UserEntity;
-import com.akshit.auth.model.LoginRequest;
-import com.akshit.auth.model.RegisterRequest;
-import com.akshit.auth.model.Token;
-import com.akshit.auth.model.UserResponse;
+import com.akshit.auth.model.*;
 import com.akshit.auth.repo.UserRepository;
 import com.akshit.auth.utils.Cookies;
 import jakarta.servlet.http.Cookie;
@@ -23,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static com.akshit.auth.utils.Cookies.getAccessTokenCookie;
 import static com.akshit.auth.utils.Cookies.getRefreshTokenCookie;
@@ -128,5 +127,13 @@ public class UserService implements UserDetailsService {
                 .header(HttpHeaders.SET_COOKIE, removeAccessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, removeRefreshTokenCookie.toString())
                 .build();
+    }
+
+    public List<UserResponse> usersSearch(String value){
+        String search = "%" + value + "%";
+        return userRepository.findTop10ByEmailLikeOrFirstNameLikeOrLastNameLike(search, search, search)
+                .stream()
+                .map(UserResponse::fromEntity)
+                .toList();
     }
 }

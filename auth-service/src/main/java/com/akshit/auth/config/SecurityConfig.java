@@ -33,7 +33,6 @@ public class SecurityConfig {
 
     private AntPathRequestMatcher[] authenticatedRequestPaths = {
             new AntPathRequestMatcher("/api/v1/users", "GET"),
-            new AntPathRequestMatcher("/api/v1/users", "POST"),
             new AntPathRequestMatcher("/api/v1/users/logout", "POST"),
             new AntPathRequestMatcher("/api/v1/users/search", "GET"),
     };

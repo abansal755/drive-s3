@@ -3,6 +3,7 @@ package com.akshit.api.service;
 import com.akshit.api.entity.*;
 import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.PermissionCreateRequest;
+import com.akshit.api.model.PermissionModifyRequest;
 import com.akshit.api.model.User;
 import com.akshit.api.repo.FileRepository;
 import com.akshit.api.repo.FolderRepository;
@@ -42,6 +43,22 @@ public class PermissionService {
     private void permissionExistenceRequiredValidation(PermissionEntity permission){
         if(permission == null)
             throw new ApiException("Permission not found", HttpStatus.NOT_FOUND);
+    }
+
+    private void permissionModificationAuthorization(PermissionEntity permission, User user){
+        ResourceType resourceType = permission.getResourceType();
+        Long resourceId = permission.getResourceId();
+        boolean isOwner = false;
+        if(resourceType == ResourceType.FOLDER){
+            FolderEntity folder = folderRepository.findFolderEntityById(resourceId);
+            isOwner = folderService.checkIfFolderIsOwnedByUser(folder, user);
+        }
+        else if(resourceType == ResourceType.FILE){
+            FileEntity file = fileRepository.findFileEntityById(resourceId);
+            isOwner = fileService.checkIfFileIsOwnedByUser(file, user);
+        }
+        if(!isOwner)
+            throw new ApiException("User is not allowed to modify this permission", HttpStatus.FORBIDDEN);
     }
 
     @Transactional
@@ -96,21 +113,50 @@ public class PermissionService {
     public void deletePermission(Long permissionId, User user){
         PermissionEntity permission = permissionRepository.findPermissionEntityById(permissionId);
         permissionExistenceRequiredValidation(permission);
-
-        ResourceType resourceType = permission.getResourceType();
-        Long resourceId = permission.getResourceId();
-        boolean isOwner = false;
-        if(resourceType == ResourceType.FOLDER){
-            FolderEntity folder = folderRepository.findFolderEntityById(resourceId);
-            isOwner = folderService.checkIfFolderIsOwnedByUser(folder, user);
-        }
-        else if(resourceType == ResourceType.FILE){
-            FileEntity file = fileRepository.findFileEntityById(resourceId);
-            isOwner = fileService.checkIfFileIsOwnedByUser(file, user);
-        }
-        if(!isOwner)
-            throw new ApiException("User is not allowed to delete this permission", HttpStatus.FORBIDDEN);
+        permissionModificationAuthorization(permission, user);
 
         permissionRepository.deleteById(permissionId);
+    }
+
+    @Transactional
+    public void modifyPermission(Long permissionId, PermissionModifyRequest permissionModifyRequest, User user){
+        PermissionEntity permission = permissionRepository.findPermissionEntityById(permissionId);
+        permissionExistenceRequiredValidation(permission);
+        permissionModificationAuthorization(permission, user);
+
+        PermissionType permissionType = permissionModifyRequest.getPermissionType();
+        if(permission.getPermissionType() == PermissionType.READ){
+            if(permissionType == PermissionType.READ)
+                throw new ApiException("Read permission already granted", HttpStatus.BAD_REQUEST);
+            permission.setPermissionType(PermissionType.WRITE);
+        }
+        else{
+            if(permissionType == PermissionType.WRITE)
+                throw new ApiException("Write permission already granted", HttpStatus.BAD_REQUEST);
+            FolderEntity folder;
+            if(permission.getResourceType() == ResourceType.FOLDER)
+                folder = folderRepository.findFolderEntityById(permission.getResourceId());
+            else{
+                FileEntity file = fileRepository.findFileEntityById(permission.getResourceId());
+                folder = folderRepository.findFolderEntityById(file.getParentFolderId());
+            }
+            boolean[] doesReadPermissionExist = { false };
+            folderService.forEachAncestor(folder, (current) -> {
+                PermissionEntity currentPermission = permissionRepository.findByResourceIdAndResourceTypeAndUserId(current.getId(), ResourceType.FOLDER, permission.getUserId());
+                if(currentPermission != null && currentPermission.getPermissionType() == PermissionType.READ){
+                    doesReadPermissionExist[0] = true;
+                    return false;
+                }
+                return true;
+            });
+            if(doesReadPermissionExist[0]){
+                permissionRepository.deleteById(permissionId);
+                return;
+            }
+            else{
+                permission.setPermissionType(PermissionType.READ);
+            }
+        }
+        permissionRepository.save(permission);
     }
 }

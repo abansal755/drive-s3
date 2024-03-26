@@ -6,10 +6,20 @@ import epochToDateString from "../../../utils/epochToDateString.js";
 import RenameFileButton from "./FileRow/RenameFileButton.jsx";
 import DeleteFileButton from "./FileRow/DeleteFileButton.jsx";
 import DownloadFileButton from "./FileRow/DownloadFileButton.jsx";
+import { useTheme } from "@emotion/react";
 
 const FileRow = ({ file, parentFolderId }) => {
+	const theme = useTheme();
+
 	return (
-		<Tr>
+		<Tr
+			transition="200ms"
+			sx={{
+				":hover": {
+					bgColor: theme.colors.blue[800],
+				},
+			}}
+		>
 			<Td>
 				<ChakraLink
 					as={ReactRouterLink}
@@ -28,14 +38,18 @@ const FileRow = ({ file, parentFolderId }) => {
 			<Td>{file.sizeInBytes && prettyBytes(file.sizeInBytes)}</Td>
 			<Td>
 				<HStack spacing={3}>
-					<RenameFileButton
-						file={file}
-						parentFolderId={parentFolderId}
-					/>
-					<DeleteFileButton
-						file={file}
-						parentFolderId={parentFolderId}
-					/>
+					{file.permissionType === "WRITE" && (
+						<RenameFileButton
+							file={file}
+							parentFolderId={parentFolderId}
+						/>
+					)}
+					{file.permissionType === "WRITE" && (
+						<DeleteFileButton
+							file={file}
+							parentFolderId={parentFolderId}
+						/>
+					)}
 					<DownloadFileButton file={file} />
 				</HStack>
 			</Td>

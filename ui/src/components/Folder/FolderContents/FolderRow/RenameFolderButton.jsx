@@ -17,7 +17,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "../../../../lib/axios.js";
 
-const RenameFolderButton = ({ folder, parentFolderId }) => {
+const RenameFolderButton = ({ folder, queriesToInvalidate, colorScheme }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [folderName, setFolderName] = useState("");
 	const queryClient = useQueryClient();
@@ -29,9 +29,12 @@ const RenameFolderButton = ({ folder, parentFolderId }) => {
 			});
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["folder", parentFolderId, "contents"],
-			});
+			if (queriesToInvalidate)
+				queriesToInvalidate.forEach((queryKey) =>
+					queryClient.invalidateQueries({
+						queryKey,
+					}),
+				);
 			onClose();
 		},
 	});
@@ -52,7 +55,7 @@ const RenameFolderButton = ({ folder, parentFolderId }) => {
 				<IconButton
 					icon={<PencilSquareIcon boxSize={5} />}
 					mr={3}
-					colorScheme="blue"
+					colorScheme={colorScheme}
 					onClick={modalOpenHandler}
 					size="sm"
 				/>

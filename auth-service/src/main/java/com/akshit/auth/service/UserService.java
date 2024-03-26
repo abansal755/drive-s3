@@ -131,7 +131,7 @@ public class UserService implements UserDetailsService {
 
     public List<UserResponse> usersSearch(String value){
         String search = "%" + value + "%";
-        return userRepository.findTop10ByEmailLikeOrFirstNameLikeOrLastNameLike(search, search, search)
+        return userRepository.searchUsers(search)
                 .stream()
                 .map(UserResponse::fromEntity)
                 .toList();

@@ -5,29 +5,24 @@ import {
 	BreadcrumbItem,
 	BreadcrumbLink,
 	Button,
+	HStack,
+	IconButton,
 	Menu,
 	MenuButton,
-	MenuItem,
 	MenuList,
 	Text,
+	Tooltip,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon, AddIcon, InfoIcon } from "@chakra-ui/icons";
 import { Link as ReactRouterLink } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { apiInstance } from "../../lib/axios";
 import NewFolderButton from "./Header/NewFolderButton.jsx";
 import NewFileButton from "./Header/NewFileButton.jsx";
+import FolderInfoButton from "./Header/FolderInfoButton";
+import RenameFolderButton from "./FolderContents/FolderRow/RenameFolderButton.jsx";
 
-const Header = ({ folderId }) => {
-	const { data, isSuccess } = useQuery({
-		queryKey: ["folder", folderId, "ancestors"],
-		queryFn: async () => {
-			const { data: folderAncestors } = await apiInstance.get(
-				`/api/v1/folders/${folderId}/ancestors`,
-			);
-			return folderAncestors;
-		},
-	});
+const Header = ({ ancestors, rootFolderOwner, permissionType }) => {
+	const folder = ancestors.at(-1);
+	const folderId = folder.id;
 
 	return (
 		<Box
@@ -38,13 +33,13 @@ const Header = ({ folderId }) => {
 			justifyContent="space-between"
 			alignItems="center"
 		>
-			<Breadcrumb separator={<ChevronRightIcon />}>
-				{isSuccess &&
-					data.ancestors.map((ancestor, idx) => (
+			<HStack>
+				<Breadcrumb separator={<ChevronRightIcon />}>
+					{ancestors.map((ancestor, idx) => (
 						<BreadcrumbItem key={ancestor.id}>
 							{!ancestor.parentFolderId && (
 								<Avatar
-									name={`${data.rootFolderOwner.firstName} ${data.rootFolderOwner.lastName}`}
+									name={`${rootFolderOwner.firstName} ${rootFolderOwner.lastName}`}
 									size="sm"
 									mr={2}
 								/>
@@ -58,28 +53,48 @@ const Header = ({ folderId }) => {
 								<Text
 									fontSize="xl"
 									fontWeight={
-										idx === data.ancestors.length - 1
+										idx === ancestors.length - 1
 											? "medium"
 											: "normal"
 									}
 								>
 									{ancestor.parentFolderId
 										? ancestor.folderName
-										: data.rootFolderOwner.email}
+										: rootFolderOwner.email}
 								</Text>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 					))}
-			</Breadcrumb>
-			<Menu>
-				<MenuButton as={Button} rightIcon={<AddIcon />}>
-					New
-				</MenuButton>
-				<MenuList>
-					<NewFileButton folderId={folderId} />
-					<NewFolderButton folderId={folderId} />
-				</MenuList>
-			</Menu>
+				</Breadcrumb>
+				{permissionType === "WRITE" && folder.parentFolderId && (
+					<RenameFolderButton
+						folder={folder}
+						queriesToInvalidate={[
+							["folder", folderId.toString(), "ancestors"],
+						]}
+					/>
+				)}
+			</HStack>
+			<HStack>
+				{
+					<FolderInfoButton
+						folder={folder}
+						rootFolderOwner={rootFolderOwner}
+						permissionType={permissionType}
+					/>
+				}
+				{permissionType === "WRITE" && (
+					<Menu>
+						<MenuButton as={Button} rightIcon={<AddIcon />}>
+							New
+						</MenuButton>
+						<MenuList>
+							<NewFileButton folderId={folderId} />
+							<NewFolderButton folderId={folderId} />
+						</MenuList>
+					</Menu>
+				)}
+			</HStack>
 		</Box>
 	);
 };

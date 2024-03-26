@@ -14,8 +14,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
 public class FolderService {
@@ -167,6 +170,26 @@ public class FolderService {
         return size[0];
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void addPermissionTypeToFolder(Folder folder, PermissionType parentFolderPermission, User user){
+        folder.setPermissionType(parentFolderPermission);
+        if(parentFolderPermission == PermissionType.READ){
+            PermissionEntity current = permissionRepository.findByResourceIdAndResourceTypeAndUserId(folder.getId(), ResourceType.FOLDER, user.getId());
+            if(current != null && current.getPermissionType() == PermissionType.WRITE)
+                folder.setPermissionType(PermissionType.WRITE);
+        }
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void addPermissionTypeToFile(File file, PermissionType parentFolderPermission, User user){
+        file.setPermissionType(parentFolderPermission);
+        if(parentFolderPermission == PermissionType.READ){
+            PermissionEntity current = permissionRepository.findByResourceIdAndResourceTypeAndUserId(file.getId(), ResourceType.FOLDER, user.getId());
+            if(current != null && current.getPermissionType() == PermissionType.WRITE)
+                file.setPermissionType(PermissionType.WRITE);
+        }
+    }
+
     public void folderExistenceRequiredValidation(FolderEntity folder){
         if(folder == null)
             throw new ApiException("Folder not found", HttpStatus.NOT_FOUND);
@@ -201,8 +224,18 @@ public class FolderService {
         List<FileEntity> files = getChildFiles(folder);
         return FolderContentsResponse
                 .builder()
-                .folders(folders.stream().map(Folder::fromEntity).toList())
-                .files(files.stream().map(File::fromEntity).toList())
+                .folders(folders
+                        .stream()
+                        .map(Folder::fromEntity)
+                        .peek(fol -> addPermissionTypeToFolder(fol, permission, user))
+                        .toList()
+                )
+                .files(files
+                        .stream()
+                        .map(File::fromEntity)
+                        .peek(file -> addPermissionTypeToFile(file, permission, user))
+                        .toList()
+                )
                 .build();
     }
 
@@ -275,6 +308,7 @@ public class FolderService {
 
         int[] lastAccessibleFolder = { -1 };
         FolderEntity[] rootFolder = { null };
+        PermissionEntity[] userPermission = { null };
         forEachAncestor(folder, (currentFolder) -> {
             ancestors.add(currentFolder);
             rootFolder[0] = currentFolder;
@@ -283,8 +317,10 @@ public class FolderService {
                     currentFolder.getId(),
                     ResourceType.FOLDER,
                     user.getId());
-            if(permission != null)
+            if(permission != null){
                 lastAccessibleFolder[0] = ancestors.size() - 1;
+                if(userPermission[0] == null) userPermission[0] = permission;
+            }
             return true;
         });
 
@@ -292,12 +328,18 @@ public class FolderService {
             throw new ApiException("User doesn't have read permission for this folder", HttpStatus.FORBIDDEN);
 
         List<FolderEntity> ancestorsRes = ancestors;
-        Collections.reverse(ancestorsRes);
         if(lastAccessibleFolder[0] != -1)
             ancestorsRes = ancestors.subList(0, lastAccessibleFolder[0] + 1);
+        Collections.reverse(ancestorsRes);
 
         Long ownerId = getFolderOwnerId(rootFolder[0]);
         User owner = authService.getUserById(ownerId);
+
+        PermissionType permissionType;
+        if(userPermission[0] != null)
+            permissionType = userPermission[0].getPermissionType();
+        else
+            permissionType = PermissionType.WRITE;
 
         return AncestorsResponse
                 .builder()
@@ -308,6 +350,7 @@ public class FolderService {
                                 .toList()
                 )
                 .rootFolderOwner(owner)
+                .permissionType(permissionType)
                 .build();
     }
 
@@ -323,5 +366,37 @@ public class FolderService {
                 .builder()
                 .sizeInBytes(getFolderSize(folder))
                 .build();
+    }
+
+    @Transactional
+    public List<PermissionResponse> getPermissionsGranted(Long folderId, User user){
+        FolderEntity folder = folderRepository.findFolderEntityById(folderId);
+        folderExistenceRequiredValidation(folder);
+
+        if(!checkIfFolderIsOwnedByUser(folder, user))
+            throw new ApiException("Not allowed to get the permissions granted for this folder", HttpStatus.FORBIDDEN);
+
+        List<CompletableFuture<PermissionResponse>> completableFutures = new ArrayList<>();
+        forEachAncestor(folder, (current) -> {
+            List<PermissionEntity> permissions = permissionRepository.findAllByResourceIdAndResourceType(current.getId(), ResourceType.FOLDER);
+            permissions.forEach(permission -> {
+                CompletableFuture<PermissionResponse> completableFuture = CompletableFuture
+                        .supplyAsync(() -> PermissionResponse
+                            .builder()
+                            .id(permission.getId())
+                            .createdAt(permission.getCreatedAt())
+                            .permissionType(permission.getPermissionType())
+                            .user(authService.getUserById(permission.getUserId()))
+                            .grantedToAnAncestorFolder(!current.getId().equals(folderId))
+                            .build()
+                        );
+                completableFutures.add(completableFuture);
+            });
+            return true;
+        });
+        return completableFutures
+                .stream()
+                .map(CompletableFuture::join)
+                .toList();
     }
 }

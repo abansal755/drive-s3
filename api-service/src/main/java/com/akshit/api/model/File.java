@@ -1,6 +1,7 @@
 package com.akshit.api.model;
 
 import com.akshit.api.entity.FileEntity;
+import com.akshit.api.entity.PermissionType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class File {
     private String extension;
     private Long createdAt;
     private Long sizeInBytes;
+    private PermissionType permissionType;
 
     public static File fromEntity(FileEntity file){
         return File

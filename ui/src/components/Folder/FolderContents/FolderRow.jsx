@@ -7,6 +7,7 @@ import epochToDateString from "../../../utils/epochToDateString.js";
 import { useQuery } from "@tanstack/react-query";
 import { apiInstance } from "../../../lib/axios.js";
 import prettyBytes from "pretty-bytes";
+import { useTheme } from "@emotion/react";
 
 const FolderRow = ({ folder, parentFolderId }) => {
 	const { data: sizeInBytes, isSuccess } = useQuery({
@@ -19,8 +20,17 @@ const FolderRow = ({ folder, parentFolderId }) => {
 		},
 	});
 
+	const theme = useTheme();
+
 	return (
-		<Tr>
+		<Tr
+			transition="200ms"
+			sx={{
+				":hover": {
+					bgColor: theme.colors.blue[800],
+				},
+			}}
+		>
 			<Td>
 				<ChakraLink
 					as={ReactRouterLink}
@@ -35,14 +45,22 @@ const FolderRow = ({ folder, parentFolderId }) => {
 			<Td>{epochToDateString(folder.createdAt)}</Td>
 			<Td>{isSuccess && prettyBytes(sizeInBytes)}</Td>
 			<Td>
-				<RenameFolderButton
-					folder={folder}
-					parentFolderId={parentFolderId}
-				/>
-				<DeleteFolderButton
-					folder={folder}
-					parentFolderId={parentFolderId}
-				/>
+				{folder.permissionType === "WRITE" && (
+					<RenameFolderButton
+						folder={folder}
+						parentFolderId={parentFolderId}
+						queriesToInvalidate={[
+							["folder", parentFolderId, "contents"],
+						]}
+						colorScheme="blue"
+					/>
+				)}
+				{folder.permissionType === "WRITE" && (
+					<DeleteFolderButton
+						folder={folder}
+						parentFolderId={parentFolderId}
+					/>
+				)}
 			</Td>
 		</Tr>
 	);

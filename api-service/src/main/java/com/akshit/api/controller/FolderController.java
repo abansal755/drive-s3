@@ -1,6 +1,7 @@
 package com.akshit.api.controller;
 
 import com.akshit.api.entity.FolderEntity;
+import com.akshit.api.entity.PermissionEntity;
 import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.*;
 import com.akshit.api.service.FolderService;
@@ -38,6 +39,11 @@ public class FolderController {
             @AuthenticationPrincipal User user
     ){
         return folderService.getFolderAncestors(folderId, user);
+    }
+
+    @GetMapping("{folderId}/permissions")
+    public List<PermissionResponse> getPermissionsGranted(@PathVariable Long folderId, @AuthenticationPrincipal User user){
+        return folderService.getPermissionsGranted(folderId, user);
     }
 
     @GetMapping("{folderId}/size")

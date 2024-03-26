@@ -198,7 +198,7 @@ const NewFileButton = ({ folderId }) => {
 								abortMutation.isPending ||
 								abortMutation.isSuccess
 							}
-							isDisabled={uploadMutation.isIdle}
+							isDisabled={!uploadId}
 							colorScheme="red"
 							loadingText="Aborting"
 							type="button"

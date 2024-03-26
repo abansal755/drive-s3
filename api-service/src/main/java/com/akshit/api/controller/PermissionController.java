@@ -2,6 +2,7 @@ package com.akshit.api.controller;
 
 import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.PermissionCreateRequest;
+import com.akshit.api.model.PermissionModifyRequest;
 import com.akshit.api.model.User;
 import com.akshit.api.service.PermissionService;
 import jakarta.validation.Valid;
@@ -30,5 +31,14 @@ public class PermissionController {
             @AuthenticationPrincipal User user)
     {
         permissionService.deletePermission(permissionId, user);
+    }
+
+    @PatchMapping("{permissionId}")
+    public void modifyPermission(
+            @PathVariable Long permissionId,
+            @Valid @RequestBody PermissionModifyRequest permissionModifyRequest,
+            @AuthenticationPrincipal User user)
+    {
+        permissionService.modifyPermission(permissionId, permissionModifyRequest, user);
     }
 }

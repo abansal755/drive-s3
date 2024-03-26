@@ -165,10 +165,16 @@ public class PermissionService {
                 permissionRepository.deleteById(permissionId);
                 return;
             }
-            else{
+            else
                 permission.setPermissionType(PermissionType.READ);
-            }
         }
         permissionRepository.save(permission);
+
+        if(permission.getResourceType() == ResourceType.FOLDER){
+            FolderEntity folder = folderRepository.findFolderEntityById(permission.getResourceId());
+            folderService.deleteAllPermissionsInChildren(folder, new User(permission.getUserId()), PermissionType.READ);
+            if(permissionType == PermissionType.WRITE)
+                folderService.deleteAllPermissionsInChildren(folder, new User(permission.getUserId()), PermissionType.WRITE);
+        }
     }
 }

@@ -11,9 +11,11 @@ import com.akshit.api.repo.PermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class PermissionService {
@@ -32,6 +34,9 @@ public class PermissionService {
 
     @Autowired
     private FileRepository fileRepository;
+
+    @Autowired
+    private AuthService authService;
 
     private void resourcePermissionNotExistsValidation(PermissionType permissionType, PermissionType existingPermission){
         if((permissionType == PermissionType.READ) && (existingPermission != null))
@@ -66,8 +71,8 @@ public class PermissionService {
         PermissionType permissionType = permissionCreateRequest.getPermissionType();
         ResourceType resourceType = permissionCreateRequest.getResourceType();
         Long resourceId = permissionCreateRequest.getResourceId();
-        Long userId = permissionCreateRequest.getUserId(); //TODO: validation for user ID
-        User otherUser = new User(userId);
+        Long userId = permissionCreateRequest.getUserId();
+        User otherUser = authService.getUserById(userId);
 
         if(user.getId().equals(userId))
             throw new ApiException("Can't give permission to yourself", HttpStatus.BAD_REQUEST);
@@ -97,16 +102,23 @@ public class PermissionService {
         if(existingPermission != null){
             existingPermission.setPermissionType(permissionType);
             permissionRepository.save(existingPermission);
-            return;
         }
-        permissionRepository.save(PermissionEntity
-                .builder()
-                .userId(userId)
-                .permissionType(permissionType)
-                .resourceType(resourceType)
-                .resourceId(resourceId)
-                .createdAt(new Date().getTime())
-                .build());
+        else
+            permissionRepository.save(PermissionEntity
+                    .builder()
+                    .userId(userId)
+                    .permissionType(permissionType)
+                    .resourceType(resourceType)
+                    .resourceId(resourceId)
+                    .createdAt(new Date().getTime())
+                    .build());
+
+        if(resourceType == ResourceType.FOLDER){
+            FolderEntity folder = folderRepository.findFolderEntityById(resourceId);
+            folderService.deleteAllPermissionsInChildren(folder, otherUser, PermissionType.READ);
+            if(permissionType == PermissionType.WRITE)
+                folderService.deleteAllPermissionsInChildren(folder, otherUser, PermissionType.WRITE);
+        }
     }
 
     @Transactional

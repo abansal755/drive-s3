@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import PencilSquareIcon from "../../../../assets/icons/PencilSquareIcon.jsx";
+import PencilSquareIcon from "../../assets/icons/PencilSquareIcon.jsx";
 import {
 	Button,
 	IconButton,
@@ -15,7 +15,7 @@ import {
 	useDisclosure,
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiInstance } from "../../../../lib/axios.js";
+import { apiInstance } from "../../lib/axios.js";
 
 const RenameFolderButton = ({ folder, queriesToInvalidate, colorScheme }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();

@@ -27,6 +27,7 @@ import { useAuthContext } from "../../../context/AuthContext";
 import { apiInstance } from "../../../lib/axios";
 import PermissionRow from "./FolderInfoButton/PermissionRow";
 import AddPermissionSelect from "./FolderInfoButton/AddPermissionSelect";
+import CopyLinkButton from "./FolderInfoButton/CopyLinkButton";
 
 const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -142,6 +143,7 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 						</VStack>
 					</ModalBody>
 					<ModalFooter>
+						<CopyLinkButton />
 						<Button onClick={onClose}>Close</Button>
 					</ModalFooter>
 				</ModalContent>

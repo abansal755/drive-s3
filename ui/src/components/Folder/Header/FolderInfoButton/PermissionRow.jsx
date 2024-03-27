@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import { useTheme } from "@emotion/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Fragment } from "react";
 import { useAuthContext } from "../../../../context/AuthContext";
 import { apiInstance } from "../../../../lib/axios";
 
@@ -107,6 +106,8 @@ const PermissionRow = ({ permission, isUserOwner, folder }) => {
 								onClick={() =>
 									modifyPermissionMutation.mutate("WRITE")
 								}
+								isLoading={modifyPermissionMutation.isPending}
+								isDisabled={deletePermissionMutation.isPending}
 							/>
 						</Tooltip>
 					)}
@@ -120,6 +121,8 @@ const PermissionRow = ({ permission, isUserOwner, folder }) => {
 								onClick={() =>
 									modifyPermissionMutation.mutate("READ")
 								}
+								isLoading={modifyPermissionMutation.isPending}
+								isDisabled={deletePermissionMutation.isPending}
 							/>
 						</Tooltip>
 					)}
@@ -130,6 +133,8 @@ const PermissionRow = ({ permission, isUserOwner, folder }) => {
 							isRound
 							size="sm"
 							onClick={deletePermissionMutation.mutate}
+							isLoading={deletePermissionMutation.isPending}
+							isDisabled={modifyPermissionMutation.isPending}
 						/>
 					</Tooltip>
 				</HStack>

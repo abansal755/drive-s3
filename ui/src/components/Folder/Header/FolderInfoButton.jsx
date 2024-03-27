@@ -18,6 +18,12 @@ import {
 	Heading,
 	HStack,
 	VStack,
+	Alert,
+	AlertIcon,
+	AlertTitle,
+	Progress,
+	CircularProgress,
+	Box,
 } from "@chakra-ui/react";
 import { InfoIcon } from "@chakra-ui/icons";
 import epochToDateString from "../../../utils/epochToDateString";
@@ -28,6 +34,7 @@ import { apiInstance } from "../../../lib/axios";
 import PermissionRow from "./FolderInfoButton/PermissionRow";
 import AddPermissionSelect from "./FolderInfoButton/AddPermissionSelect";
 import CopyLinkButton from "./FolderInfoButton/CopyLinkButton";
+import RootFolderLoading from "../../common/Loading";
 
 const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -40,6 +47,7 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 		data: permissions,
 		isSuccess,
 		isLoading,
+		isError,
 	} = useQuery({
 		queryKey: ["folder", folder.id, "permissions"],
 		enabled: isUserOwner,
@@ -113,6 +121,14 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 						<Heading size="md" mt={4} mb={4}>
 							Permissions
 						</Heading>
+						{isError && (
+							<Alert status="error" mb={2}>
+								<AlertIcon />
+								<AlertTitle>
+									Error fetching permissions
+								</AlertTitle>
+							</Alert>
+						)}
 						<AddPermissionSelect folder={folder} />
 						<VStack alignItems="start" spacing={0}>
 							<PermissionRow
@@ -131,6 +147,7 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 									isUserOwner={isUserOwner}
 								/>
 							)}
+							{isLoading && <RootFolderLoading />}
 							{isSuccess &&
 								permissions.map((permission) => (
 									<PermissionRow

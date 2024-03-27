@@ -1,4 +1,14 @@
-import { HStack, Text, Avatar, VStack, Input, Button } from "@chakra-ui/react";
+import {
+	HStack,
+	Text,
+	Avatar,
+	VStack,
+	Input,
+	Button,
+	Alert,
+	AlertIcon,
+	AlertTitle,
+} from "@chakra-ui/react";
 import { useTheme } from "@emotion/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -10,7 +20,6 @@ const AddPermissionSelect = ({ folder }) => {
 	const [searchText, setSearchText] = useState("");
 	const searchTextDebounced = useDebounce(searchText, 1000);
 	const [isSelectVisible, setIsSelectVisible] = useState(false);
-	const { user } = useAuthContext();
 	const {
 		data: users,
 		isSuccess,
@@ -46,6 +55,14 @@ const AddPermissionSelect = ({ folder }) => {
 
 	return (
 		<VStack display="block" position="relative" mb={3}>
+			{mutation.isError && (
+				<Alert status="error" mb={2}>
+					<AlertIcon />
+					<AlertTitle>
+						{mutation.error.response.data.message}
+					</AlertTitle>
+				</Alert>
+			)}
 			<Input
 				value={searchText}
 				onInput={(e) => setSearchText(e.target.value)}

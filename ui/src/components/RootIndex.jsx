@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Navigate } from "react-router-dom";
 import { apiInstance } from "../lib/axios";
 import { useAuthContext } from "../context/AuthContext.jsx";
-import RootFolderLoading from "./common/RootFolderLoading.jsx";
+import Loading from "./common/Loading.jsx";
 
 const RootIndex = () => {
 	const { user } = useAuthContext();
@@ -16,7 +16,7 @@ const RootIndex = () => {
 		gcTime: Infinity,
 	});
 	if (isSuccess) return <Navigate to={`../folder/${rootFolder.id}`} />;
-	return <RootFolderLoading />;
+	return <Loading />;
 };
 
 export default RootIndex;

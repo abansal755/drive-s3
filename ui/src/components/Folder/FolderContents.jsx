@@ -1,12 +1,24 @@
-import { Stack, Table, Thead, Tr, Th, Tbody, Progress } from "@chakra-ui/react";
+import {
+	Stack,
+	Table,
+	Thead,
+	Tr,
+	Th,
+	Tbody,
+	Progress,
+	Alert,
+	AlertIcon,
+	AlertTitle,
+	AlertDescription,
+	Box,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { Fragment } from "react";
 import { apiInstance } from "../../lib/axios";
 import FolderRow from "./FolderContents/FolderRow.jsx";
 import FileRow from "./FolderContents/FileRow.jsx";
 
 const FolderContents = ({ folderId }) => {
-	const { data, isLoading, isSuccess } = useQuery({
+	const { data, isLoading, isSuccess, isError, error } = useQuery({
 		queryKey: ["folder", folderId, "contents"],
 		queryFn: async () => {
 			const { data: folderContents } = await apiInstance.get(
@@ -25,42 +37,58 @@ const FolderContents = ({ folderId }) => {
 			overflow="scroll"
 			flexBasis={0}
 		>
-			<Progress
-				isIndeterminate
-				size="xs"
-				visibility={isLoading ? "visible" : "hidden"}
-			/>
-			<Table variant="simple">
-				<Thead>
-					<Tr>
-						<Th>Name</Th>
-						<Th>Type</Th>
-						<Th>Created At</Th>
-						<Th>Size</Th>
-						<Th>Actions</Th>
-					</Tr>
-				</Thead>
-				<Tbody>
-					{isSuccess && (
-						<Fragment>
-							{data.folders.map((folder) => (
-								<FolderRow
-									folder={folder}
-									parentFolderId={folderId}
-									key={`folder-${folder.id}`}
-								/>
-							))}
-							{data.files.map((file) => (
-								<FileRow
-									file={file}
-									key={`file-${file.id}`}
-									parentFolderId={folderId}
-								/>
-							))}
-						</Fragment>
-					)}
-				</Tbody>
-			</Table>
+			{!isError && (
+				<Progress
+					isIndeterminate
+					size="xs"
+					visibility={isLoading ? "visible" : "hidden"}
+				/>
+			)}
+			{isError && (
+				<Alert
+					status="error"
+					flexDir="column"
+					height="100%"
+					justifyContent="center"
+				>
+					<AlertIcon boxSize={8} />
+					<AlertTitle mt={4} mb={1} fontSize="lg">
+						Error fetching contents
+					</AlertTitle>
+					<AlertDescription>
+						{error.response.data.message}
+					</AlertDescription>
+				</Alert>
+			)}
+			{isSuccess && (
+				<Table variant="simple">
+					<Thead>
+						<Tr>
+							<Th>Name</Th>
+							<Th>Type</Th>
+							<Th>Created At</Th>
+							<Th>Size</Th>
+							<Th>Actions</Th>
+						</Tr>
+					</Thead>
+					<Tbody>
+						{data.folders.map((folder) => (
+							<FolderRow
+								folder={folder}
+								parentFolderId={folderId}
+								key={`folder-${folder.id}`}
+							/>
+						))}
+						{data.files.map((file) => (
+							<FileRow
+								file={file}
+								key={`file-${file.id}`}
+								parentFolderId={folderId}
+							/>
+						))}
+					</Tbody>
+				</Table>
+			)}
 		</Stack>
 	);
 };

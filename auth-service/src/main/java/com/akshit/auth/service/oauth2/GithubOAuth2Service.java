@@ -1,6 +1,7 @@
 package com.akshit.auth.service.oauth2;
 
 import com.akshit.auth.entity.UserEntity;
+import com.akshit.auth.exception.ApiException;
 import com.akshit.auth.model.GithubAccessTokenRequestResponse;
 import com.akshit.auth.model.GithubGetUserRequestResponse;
 import com.akshit.auth.model.Token;
@@ -68,11 +69,11 @@ public class GithubOAuth2Service {
             String state,
             String error,
             HttpServletRequest request
-    ) throws Exception
+    )
     {
         String stateCookie = Cookies.readServletCookie(request, "state");
         if(stateCookie == null || !stateCookie.equals(state))
-            throw new Exception("Malformed state");
+            throw new ApiException("Malformed state", HttpStatus.BAD_REQUEST);
 
         String referer = jwtService.extractClaim(state, Claims::getSubject);
         ResponseCookie removeStateCookie = ResponseCookie

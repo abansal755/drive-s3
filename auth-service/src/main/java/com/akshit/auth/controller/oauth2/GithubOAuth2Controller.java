@@ -43,7 +43,7 @@ public class GithubOAuth2Controller {
             @RequestParam String state,
             @RequestParam(required = false) String error,
             HttpServletRequest request
-    ) throws Exception
+    )
     {
         return githubOAuth2Service.callbackEndpointHandler(code, state, error, request);
     }

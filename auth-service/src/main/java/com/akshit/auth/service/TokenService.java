@@ -1,12 +1,14 @@
 package com.akshit.auth.service;
 
 import com.akshit.auth.entity.UserEntity;
+import com.akshit.auth.exception.ApiException;
 import com.akshit.auth.model.AccessTokenSummary;
 import com.akshit.auth.model.Token;
 import com.akshit.auth.utils.Cookies;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +23,11 @@ public class TokenService {
     @Autowired
     private UserService userService;
 
-    public ResponseEntity<AccessTokenSummary> getNewAccessToken(HttpServletRequest request) throws Exception {
+    public ResponseEntity<AccessTokenSummary> getNewAccessToken(HttpServletRequest request) {
         String refreshToken = Cookies.readServletCookie(request, "refresh_token");
         String email = jwtService.extractEmail(refreshToken);
         if(email == null || jwtService.isTokenExpired(refreshToken))
-            throw new Exception("Invalid refresh token");
+            throw new ApiException("Invalid refresh token", HttpStatus.BAD_REQUEST);
 
         UserEntity user = userService.findUserByEmail(email);
         Token accessToken = jwtService.generateAccessToken(user);

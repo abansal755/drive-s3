@@ -25,7 +25,7 @@ public class TokenController {
     private TokenService tokenService;
 
     @PostMapping("")
-    public ResponseEntity<AccessTokenSummary> getNewAccessToken(HttpServletRequest request) throws Exception {
+    public ResponseEntity<AccessTokenSummary> getNewAccessToken(HttpServletRequest request) {
         return tokenService.getNewAccessToken(request);
     }
 }

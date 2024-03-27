@@ -5,6 +5,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -87,6 +88,20 @@ public class ExceptionHandlers {
                                 .orElse(exception.getMessage()))
                 .exception(getExceptionString(exception))
                 .stackTrace(getExceptionStackStrace(exception))
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse badCredentialsException(BadCredentialsException badCredentialsException){
+        System.err.println(getExceptionString(badCredentialsException));
+        getExceptionStackStrace(badCredentialsException).forEach(System.err::println);
+        return ExceptionResponse
+                .builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message("Invalid credentials entered")
+                .exception(getExceptionString(badCredentialsException))
+                .stackTrace(getExceptionStackStrace(badCredentialsException))
                 .build();
     }
 

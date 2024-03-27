@@ -1,5 +1,9 @@
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 import {
+	Alert,
+	AlertDescription,
+	AlertIcon,
+	AlertTitle,
 	Button,
 	Center,
 	Container,
@@ -19,7 +23,7 @@ const Login = () => {
 	const [showPass, setShowPass] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const authContext = useAuthContext();
+	const { login } = useAuthContext();
 
 	const toggleShowPass = () => {
 		setShowPass((prev) => !prev);
@@ -27,7 +31,7 @@ const Login = () => {
 
 	const formSubmitHandler = (e) => {
 		e.preventDefault();
-		authContext.login({
+		login.mutate({
 			email,
 			password,
 		});
@@ -40,6 +44,14 @@ const Login = () => {
 					<Heading size="lg" textAlign="center" mb={10}>
 						Login
 					</Heading>
+					{login.isError && (
+						<Alert status="error">
+							<AlertIcon />
+							<AlertTitle>
+								{login.error.response.data.message}
+							</AlertTitle>
+						</Alert>
+					)}
 					<Input
 						variant="filled"
 						placeholder="Email"
@@ -62,13 +74,18 @@ const Login = () => {
 							</Button>
 						</InputRightElement>
 					</InputGroup>
-					<Button colorScheme="teal" type="submit">
+					<Button
+						colorScheme="teal"
+						type="submit"
+						isLoading={login.isPending}
+					>
 						Login
 					</Button>
 					<Button
 						as={ReactRouterLink}
 						to={`${import.meta.env.VITE_AUTH_SERVICE_URI}/login/oauth2/github`}
 						leftIcon={<GithubIcon boxSize={6} />}
+						isDisabled={login.isPending}
 					>
 						Login with GitHub
 					</Button>

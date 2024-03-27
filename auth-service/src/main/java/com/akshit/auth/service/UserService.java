@@ -2,6 +2,7 @@ package com.akshit.auth.service;
 
 import com.akshit.auth.entity.Role;
 import com.akshit.auth.entity.UserEntity;
+import com.akshit.auth.exception.ApiException;
 import com.akshit.auth.model.*;
 import com.akshit.auth.repo.UserRepository;
 import com.akshit.auth.utils.Cookies;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,7 +45,10 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findUserEntityByEmail(username);
+        UserDetails user = userRepository.findUserEntityByEmail(username);
+        if(user == null)
+            throw new UsernameNotFoundException("User not found");
+        return user;
     }
 
     public UserEntity findUserByEmail(String email){
@@ -72,6 +77,9 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<UserResponse> registerUser(RegisterRequest registerRequest){
+        if(!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
+            throw new ApiException("Passwords don't match", HttpStatus.BAD_REQUEST);
+
         UserEntity user = userRepository.save(UserEntity
                 .builder()
                 .email(registerRequest.getEmail())

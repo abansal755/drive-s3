@@ -5,12 +5,12 @@ import {
 	Container,
 	Heading,
 	Input,
-	InputGroup,
-	InputRightElement,
 	Stack,
 	Link as ChakraLink,
-	Box,
 	HStack,
+	Alert,
+	AlertIcon,
+	AlertTitle,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { Link as ReactRouterLink } from "react-router-dom";
@@ -23,13 +23,14 @@ const Register = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
-	const authContext = useAuthContext();
+	const { register } = useAuthContext();
 
 	const formSubmitHandler = (e) => {
 		e.preventDefault();
-		authContext.register({
+		register.mutate({
 			email,
 			password,
+			confirmPassword,
 			firstName,
 			lastName,
 		});
@@ -42,6 +43,14 @@ const Register = () => {
 					<Heading size="lg" textAlign="center" mb={10}>
 						Register
 					</Heading>
+					{register.isError && (
+						<Alert status="error">
+							<AlertIcon />
+							<AlertTitle>
+								{register.error.response.data.message}
+							</AlertTitle>
+						</Alert>
+					)}
 					<HStack>
 						<Input
 							variant="filled"
@@ -81,13 +90,18 @@ const Register = () => {
 						value={confirmPassword}
 						onChange={(e) => setConfirmPassword(e.target.value)}
 					/>
-					<Button colorScheme="teal" type="submit">
+					<Button
+						colorScheme="teal"
+						type="submit"
+						isLoading={register.isPending}
+					>
 						Register
 					</Button>
 					<Button
 						as={ReactRouterLink}
 						to={`${import.meta.env.VITE_AUTH_SERVICE_URI}/login/oauth2/github`}
 						leftIcon={<GithubIcon boxSize={6} />}
+						isDisabled={register.isPending}
 					>
 						Register with GitHub
 					</Button>

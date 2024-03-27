@@ -31,14 +31,15 @@ export const AuthContextProvider = ({ children }) => {
 		const expireAt = user.accessTokenExpireAtMillis;
 		const id = setInterval(
 			async () => {
-				try { authInstance.post("/api/v1/token") }
-				catch(err) {
+				try {
+					authInstance.post("/api/v1/token");
+				} catch (err) {
 					console.error(err);
 					clearInterval(id);
 					logoutMutation.mutate();
 				}
 			},
-			expireAt - 10 * 1000 - Date.now()
+			expireAt - 10 * 1000 - Date.now(),
 		);
 
 		return () => clearInterval(id);
@@ -51,7 +52,7 @@ export const AuthContextProvider = ({ children }) => {
 				{
 					email,
 					password,
-				}
+				},
 			);
 			return user;
 		},
@@ -59,10 +60,17 @@ export const AuthContextProvider = ({ children }) => {
 	});
 
 	const registerMutation = useMutation({
-		mutationFn: async ({ email, password, firstName, lastName }) => {
+		mutationFn: async ({
+			email,
+			password,
+			confirmPassword,
+			firstName,
+			lastName,
+		}) => {
 			const { data: user } = await authInstance.post("/api/v1/users", {
 				email,
 				password,
+				confirmPassword,
 				firstName,
 				lastName,
 			});
@@ -80,14 +88,10 @@ export const AuthContextProvider = ({ children }) => {
 		<AuthContext.Provider
 			value={{
 				user,
-				isLoading:
-					isLoading ||
-					loginMutation.isPending ||
-					registerMutation.isPending ||
-					logoutMutation.isPending,
+				isLoading: isLoading,
 				isLoggedIn: !!user,
-				login: loginMutation.mutate,
-				register: registerMutation.mutate,
+				login: loginMutation,
+				register: registerMutation,
 				logout: logoutMutation.mutate,
 			}}
 		>

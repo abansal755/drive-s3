@@ -129,7 +129,7 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 								</AlertTitle>
 							</Alert>
 						)}
-						<AddPermissionSelect folder={folder} />
+						{isUserOwner && <AddPermissionSelect folder={folder} />}
 						<VStack alignItems="start" spacing={0}>
 							<PermissionRow
 								permission={{

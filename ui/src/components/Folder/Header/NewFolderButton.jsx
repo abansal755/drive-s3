@@ -29,7 +29,7 @@ const NewFolderButton = ({ folderId }) => {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
-				queryKey: ["folder", folderId, "contents"],
+				queryKey: ["folder", folderId.toString(), "contents"],
 			});
 			modalCloseHandler();
 		},

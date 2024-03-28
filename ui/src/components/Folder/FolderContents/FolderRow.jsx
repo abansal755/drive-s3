@@ -1,5 +1,5 @@
 import FolderIcon from "../../../assets/icons/FolderIcon.jsx";
-import RenameFolderButton from "../../common/RenameFolderButton";
+import RenameFolderButton from "../RenameFolderButton";
 import DeleteFolderButton from "./FolderRow/DeleteFolderButton.jsx";
 import { Tr, Td, Link as ChakraLink, Text } from "@chakra-ui/react";
 import { Link as ReactRouterLink } from "react-router-dom";

@@ -1,10 +1,16 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import fs from "fs";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [react()],
+	plugins: [
+		react(),
+		nodePolyfills({
+			include: ["path"],
+		}),
+	],
 	server: {
 		https: {
 			key: fs.readFileSync(

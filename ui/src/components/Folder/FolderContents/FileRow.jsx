@@ -1,5 +1,13 @@
 import FileIcon from "../../../assets/icons/FileIcon.jsx";
-import { Tr, Td, Link as ChakraLink, Text, HStack } from "@chakra-ui/react";
+import {
+	Tr,
+	Td,
+	Link as ChakraLink,
+	Text,
+	HStack,
+	useDisclosure,
+	Button,
+} from "@chakra-ui/react";
 import { Link as ReactRouterLink } from "react-router-dom";
 import prettyBytes from "pretty-bytes";
 import epochToDateString from "../../../utils/epochToDateString.js";
@@ -7,9 +15,20 @@ import RenameFileButton from "./FileRow/RenameFileButton.jsx";
 import DeleteFileButton from "./FileRow/DeleteFileButton.jsx";
 import DownloadFileButton from "./FileRow/DownloadFileButton.jsx";
 import { useTheme } from "@emotion/react";
+import mime from "mime-types";
+import { useMemo } from "react";
+import FileViewer from "./FileRow/FileViewer.jsx";
 
 const FileRow = ({ file, parentFolderId }) => {
 	const theme = useTheme();
+	const mimeType = useMemo(() => {
+		return mime.lookup(file.extension);
+	}, [file.extension]);
+	const {
+		isOpen: isViewerOpen,
+		onOpen: onViewerOpen,
+		onClose: onViewerClose,
+	} = useDisclosure();
 
 	return (
 		<Tr
@@ -21,17 +40,22 @@ const FileRow = ({ file, parentFolderId }) => {
 			}}
 		>
 			<Td>
-				<ChakraLink
-					as={ReactRouterLink}
-					to={`../file/${file.id}`}
-					display="flex"
+				<Button
+					variant="link"
+					leftIcon={<FileIcon boxSize={5} mr={-1} />}
+					fontWeight="normal"
+					onClick={onViewerOpen}
 				>
-					<FileIcon boxSize={5} mr={1} />
-					<Text>
-						{file.name}
-						{file.extension && `.${file.extension}`}
-					</Text>
-				</ChakraLink>
+					{file.name}
+					{file.extension && `.${file.extension}`}
+				</Button>
+				<FileViewer
+					file={file}
+					mimeType={mimeType}
+					isViewerOpen={isViewerOpen}
+					onViewerOpen={onViewerOpen}
+					onViewerClose={onViewerClose}
+				/>
 			</Td>
 			<Td>File</Td>
 			<Td>{epochToDateString(file.createdAt)}</Td>

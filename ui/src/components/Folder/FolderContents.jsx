@@ -34,7 +34,7 @@ const FolderContents = ({ folderId }) => {
 			flexGrow={1}
 			flexShrink={1}
 			minH={0}
-			overflow="scroll"
+			overflow="auto"
 			flexBasis={0}
 		>
 			{!isError && (

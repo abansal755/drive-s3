@@ -1,4 +1,5 @@
 import {
+	Box,
 	Button,
 	Modal,
 	ModalBody,
@@ -10,6 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import useDownloadFile from "../../../../../hooks/useDownloadFile";
+import ReactPanZoom from "react-image-pan-zoom-rotate";
+import { useTheme } from "@emotion/react";
 
 const ImageViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 	const { initiateDownloadMutation, status, abortMutation } =
@@ -36,21 +39,28 @@ const ImageViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 
 	const closeBtnClickHandler = () => {
 		if (status === "DOWNLOADING") abortMutation.mutate();
-		else if (status === "DOWNLOADED") onViewerClose();
-		setContents([]);
+		else if (status === "DOWNLOADED") {
+			onViewerClose();
+			setContents([]);
+		}
 	};
 
 	useEffect(() => {
-		if (status === "ABORTED") onViewerClose();
+		if (status === "ABORTED") {
+			onViewerClose();
+			setContents([]);
+		}
 	}, [status]);
+
+	const theme = useTheme();
 
 	return (
 		<Modal
 			isOpen={isViewerOpen}
 			onClose={onViewerClose}
 			size="xl"
-			// scrollBehavior="inside"
 			closeOnOverlayClick={false}
+			isCentered
 		>
 			<ModalOverlay />
 			<ModalContent>
@@ -59,9 +69,17 @@ const ImageViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 					{file.extension && `.${file.extension}`}
 				</ModalHeader>
 				<ModalBody>
-					{contents && (
-						<img src={URL.createObjectURL(new Blob(contents))} />
-					)}
+					<Box
+						overflow="hidden"
+						bgColor={theme.colors.gray[800]}
+						position="relative"
+					>
+						{contents && contents.length > 0 && (
+							<ReactPanZoom
+								image={URL.createObjectURL(new Blob(contents))}
+							/>
+						)}
+					</Box>
 				</ModalBody>
 				<ModalFooter>
 					<Button

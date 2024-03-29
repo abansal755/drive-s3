@@ -65,13 +65,15 @@ const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 					{file.name}
 					{file.extension && `.${file.extension}`}
 				</ModalHeader>
-				<ModalBody>
+				<ModalBody overflowX="auto">
 					{status !== "DOWNLOADED" && <Loading />}
 					{status === "DOWNLOADED" && (
 						<Box
 							bgColor={theme.colors.gray[800]}
 							p={3}
 							borderRadius={5}
+							w="fit-content"
+							minW="100%"
 						>
 							<pre>{escapeHTML(contents)}</pre>
 						</Box>

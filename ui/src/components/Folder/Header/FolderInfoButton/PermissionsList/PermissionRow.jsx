@@ -15,8 +15,8 @@ import {
 } from "@chakra-ui/react";
 import { useTheme } from "@emotion/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuthContext } from "../../../../context/AuthContext";
-import { apiInstance } from "../../../../lib/axios";
+import { useAuthContext } from "../../../../../context/AuthContext";
+import { apiInstance } from "../../../../../lib/axios";
 
 const PermissionRow = ({ permission, isUserOwner, folder }) => {
 	const { user } = useAuthContext();

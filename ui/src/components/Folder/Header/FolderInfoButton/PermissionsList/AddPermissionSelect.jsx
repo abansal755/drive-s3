@@ -13,8 +13,8 @@ import { useTheme } from "@emotion/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useState } from "react";
-import { useAuthContext } from "../../../../context/AuthContext";
-import { apiInstance, authInstance } from "../../../../lib/axios";
+import { useAuthContext } from "../../../../../context/AuthContext";
+import { apiInstance, authInstance } from "../../../../../lib/axios";
 
 const AddPermissionSelect = ({ folder }) => {
 	const [searchText, setSearchText] = useState("");

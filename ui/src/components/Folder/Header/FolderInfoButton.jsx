@@ -77,9 +77,9 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 
 	return (
 		<Fragment>
-			<Tooltip label="Info" hasArrow>
-				<IconButton icon={<InfoIcon />} onClick={onOpen} />
-			</Tooltip>
+			<Button rightIcon={<InfoIcon />} onClick={onOpen}>
+				Info
+			</Button>
 			<Modal
 				isOpen={isOpen}
 				onClose={onClose}

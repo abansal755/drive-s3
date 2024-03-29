@@ -1,5 +1,6 @@
 package com.akshit.api.service;
 
+import com.akshit.api.entity.DownloadStatus;
 import com.akshit.api.entity.FileEntity;
 import com.akshit.api.entity.FileUploadEntity;
 import com.akshit.api.entity.UploadStatus;
@@ -117,6 +118,14 @@ public class FileUploadService {
         FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
         fileUploadExistenceRequiredValidation(fileUpload);
         fileUploadMatchUserValidation(fileUpload, user);
+
+        UploadStatus status = fileUpload.getUploadStatus();
+        if(status == UploadStatus.NOT_STARTED)
+            throw new ApiException("Upload has not been started yet", HttpStatus.BAD_REQUEST);
+        if(status == UploadStatus.UPLOADED)
+            throw new ApiException("Upload has already been completed", HttpStatus.BAD_REQUEST);
+        if(status == UploadStatus.ABORTED)
+            throw new ApiException("Upload has already been aborted", HttpStatus.BAD_REQUEST);
 
         fileUpload.setUploadStatus(UploadStatus.ABORTED);
         fileUploadRepository.save(fileUpload);

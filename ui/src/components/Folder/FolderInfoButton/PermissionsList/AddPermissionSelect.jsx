@@ -13,10 +13,10 @@ import { useTheme } from "@emotion/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useState } from "react";
-import { useAuthContext } from "../../../../../context/AuthContext";
-import { apiInstance, authInstance } from "../../../../../lib/axios";
+import { useAuthContext } from "../../../../context/AuthContext";
+import { apiInstance, authInstance } from "../../../../lib/axios";
 
-const AddPermissionSelect = ({ folder }) => {
+const AddPermissionSelect = ({ resource, resourceType }) => {
 	const [searchText, setSearchText] = useState("");
 	const searchTextDebounced = useDebounce(searchText, 1000);
 	const [isSelectVisible, setIsSelectVisible] = useState(false);
@@ -41,14 +41,18 @@ const AddPermissionSelect = ({ folder }) => {
 		mutationFn: async ({ permissionType, user }) => {
 			await apiInstance.post("/api/v1/permissions", {
 				permissionType,
-				resourceType: "FOLDER",
-				resourceId: folder.id,
+				resourceType,
+				resourceId: resource.id,
 				userId: user.id,
 			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
-				queryKey: ["folder", folder.id, "permissions"],
+				queryKey: [
+					resourceType === "FOLDER" ? "folder" : "file",
+					resource.id,
+					"permissions",
+				],
 			});
 		},
 	});

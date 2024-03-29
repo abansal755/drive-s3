@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import {
 	Button,
+	IconButton,
 	Modal,
 	ModalBody,
 	ModalCloseButton,
@@ -8,17 +9,23 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
+	Tooltip,
 	useDisclosure,
 } from "@chakra-ui/react";
 import { InfoIcon } from "@chakra-ui/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuthContext } from "../../../context/AuthContext";
-import { apiInstance } from "../../../lib/axios";
+import { useAuthContext } from "../../context/AuthContext";
+import { apiInstance } from "../../lib/axios";
 import CopyLinkButton from "./FolderInfoButton/CopyLinkButton";
 import FolderAttributes from "./FolderInfoButton/FolderAttributes";
 import PermissionsList from "./FolderInfoButton/PermissionsList";
 
-const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
+const FolderInfoButton = ({
+	folder,
+	rootFolderOwner,
+	permissionType,
+	iconBtnProps,
+}) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [sizeInBytes, setSizeInBytes] = useState(0);
 	const queryClient = useQueryClient();
@@ -48,7 +55,12 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 			folder.id.toString(),
 			"contents",
 		]);
-		if (!contents) return;
+		if (!contents) {
+			setSizeInBytes(
+				queryClient.getQueryData(["folder", folder.id, "size"]),
+			);
+			return;
+		}
 		let size = 0;
 		contents.files.forEach((file) => (size += file.sizeInBytes));
 		contents.folders.forEach((folder) => {
@@ -59,9 +71,13 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 
 	return (
 		<Fragment>
-			<Button rightIcon={<InfoIcon />} onClick={onOpen}>
-				Info
-			</Button>
+			<Tooltip label="Folder info" hasArrow>
+				<IconButton
+					icon={<InfoIcon boxSize={5} />}
+					onClick={onOpen}
+					{...iconBtnProps}
+				/>
+			</Tooltip>
 			<Modal
 				isOpen={isOpen}
 				onClose={onClose}
@@ -79,7 +95,8 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 						<PermissionsList
 							rootFolderOwner={rootFolderOwner}
 							isUserOwner={isUserOwner}
-							folder={folder}
+							resource={folder}
+							resourceType="FOLDER"
 							permissionType={permissionType}
 							permissions={permissions}
 							isLoading={isLoading}

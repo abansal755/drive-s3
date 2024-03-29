@@ -1,5 +1,5 @@
 import { Table, Tbody, Tr, Td } from "@chakra-ui/react";
-import epochToDateString from "../../../../utils/epochToDateString";
+import epochToDateString from "../../../utils/epochToDateString";
 import prettyBytes from "pretty-bytes";
 
 const FolderAttributes = ({ folder, sizeInBytes }) => {

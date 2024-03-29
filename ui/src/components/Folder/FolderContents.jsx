@@ -17,7 +17,7 @@ import { apiInstance } from "../../lib/axios";
 import FolderRow from "./FolderContents/FolderRow.jsx";
 import FileRow from "./FolderContents/FileRow.jsx";
 
-const FolderContents = ({ folderId }) => {
+const FolderContents = ({ folderId, rootFolderOwner }) => {
 	const { data, isLoading, isSuccess, isError, error } = useQuery({
 		queryKey: ["folder", folderId, "contents"],
 		queryFn: async () => {
@@ -77,6 +77,7 @@ const FolderContents = ({ folderId }) => {
 								folder={folder}
 								parentFolderId={folderId}
 								key={`folder-${folder.id}`}
+								rootFolderOwner={rootFolderOwner}
 							/>
 						))}
 						{data.files.map((file) => (

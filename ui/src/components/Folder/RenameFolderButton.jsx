@@ -54,7 +54,6 @@ const RenameFolderButton = ({ folder, queriesToInvalidate, colorScheme }) => {
 			<Tooltip label="Rename Folder" hasArrow>
 				<IconButton
 					icon={<PencilSquareIcon boxSize={5} />}
-					mr={3}
 					colorScheme={colorScheme}
 					onClick={modalOpenHandler}
 					size="sm"

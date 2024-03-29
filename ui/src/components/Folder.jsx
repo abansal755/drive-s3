@@ -4,6 +4,7 @@ import FolderContents from "./Folder/FolderContents";
 import Header from "./Folder/Header";
 import { useQuery } from "@tanstack/react-query";
 import { apiInstance } from "../lib/axios";
+import { Fragment } from "react";
 
 const Folder = () => {
 	const { folderId } = useParams();
@@ -27,13 +28,18 @@ const Folder = () => {
 				spacing={0}
 			>
 				{isSuccess && (
-					<Header
-						ancestors={data.ancestors}
-						rootFolderOwner={data.rootFolderOwner}
-						permissionType={data.permissionType}
-					/>
+					<Fragment>
+						<Header
+							ancestors={data.ancestors}
+							rootFolderOwner={data.rootFolderOwner}
+							permissionType={data.permissionType}
+						/>
+						<FolderContents
+							folderId={folderId}
+							rootFolderOwner={data.rootFolderOwner}
+						/>
+					</Fragment>
 				)}
-				<FolderContents folderId={folderId} />
 			</Stack>
 		</Container>
 	);

@@ -8,13 +8,14 @@ import {
 } from "@chakra-ui/react";
 import PermissionRow from "./PermissionsList/PermissionRow";
 import AddPermissionSelect from "./PermissionsList/AddPermissionSelect";
-import Loading from "../../../common/Loading";
-import { useAuthContext } from "../../../../context/AuthContext";
+import Loading from "../../common/Loading";
+import { useAuthContext } from "../../../context/AuthContext";
 
 const PermissionsList = ({
 	rootFolderOwner,
 	isUserOwner,
-	folder,
+	resource,
+	resourceType,
 	permissionType,
 	permissions,
 	isLoading,
@@ -34,7 +35,12 @@ const PermissionsList = ({
 					<AlertTitle>Error fetching permissions</AlertTitle>
 				</Alert>
 			)}
-			{isUserOwner && <AddPermissionSelect folder={folder} />}
+			{isUserOwner && (
+				<AddPermissionSelect
+					resource={resource}
+					resourceType={resourceType}
+				/>
+			)}
 			<VStack alignItems="start" spacing={0}>
 				<PermissionRow
 					permission={{
@@ -59,7 +65,8 @@ const PermissionsList = ({
 							key={permission.id}
 							permission={permission}
 							isUserOwner={isUserOwner}
-							folder={folder}
+							resource={resource}
+							resourceType={resourceType}
 						/>
 					))}
 			</VStack>

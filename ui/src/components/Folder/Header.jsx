@@ -6,18 +6,16 @@ import {
 	BreadcrumbLink,
 	Button,
 	HStack,
-	IconButton,
 	Menu,
 	MenuButton,
 	MenuList,
 	Text,
-	Tooltip,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, AddIcon, InfoIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
 import { Link as ReactRouterLink } from "react-router-dom";
 import NewFolderButton from "./Header/NewFolderButton.jsx";
 import NewFileButton from "./Header/NewFileButton.jsx";
-import FolderInfoButton from "./Header/FolderInfoButton";
+import FolderInfoButton from "./FolderInfoButton";
 import RenameFolderButton from "./RenameFolderButton.jsx";
 
 const Header = ({ ancestors, rootFolderOwner, permissionType }) => {

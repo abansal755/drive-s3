@@ -1,15 +1,16 @@
 import FolderIcon from "../../../assets/icons/FolderIcon.jsx";
 import RenameFolderButton from "../RenameFolderButton";
 import DeleteFolderButton from "./FolderRow/DeleteFolderButton.jsx";
-import { Tr, Td, Link as ChakraLink, Text } from "@chakra-ui/react";
+import { Tr, Td, Link as ChakraLink, Text, HStack } from "@chakra-ui/react";
 import { Link as ReactRouterLink } from "react-router-dom";
 import epochToDateString from "../../../utils/epochToDateString.js";
 import { useQuery } from "@tanstack/react-query";
 import { apiInstance } from "../../../lib/axios.js";
 import prettyBytes from "pretty-bytes";
 import { useTheme } from "@emotion/react";
+import FolderInfoButton from "../FolderInfoButton";
 
-const FolderRow = ({ folder, parentFolderId }) => {
+const FolderRow = ({ folder, parentFolderId, rootFolderOwner }) => {
 	const { data: sizeInBytes, isSuccess } = useQuery({
 		queryKey: ["folder", folder.id, "size"],
 		queryFn: async () => {
@@ -45,22 +46,33 @@ const FolderRow = ({ folder, parentFolderId }) => {
 			<Td>{epochToDateString(folder.createdAt)}</Td>
 			<Td>{isSuccess && prettyBytes(sizeInBytes)}</Td>
 			<Td>
-				{folder.permissionType === "WRITE" && (
-					<RenameFolderButton
+				<HStack spacing={3}>
+					<FolderInfoButton
 						folder={folder}
-						parentFolderId={parentFolderId}
-						queriesToInvalidate={[
-							["folder", parentFolderId, "contents"],
-						]}
-						colorScheme="blue"
+						rootFolderOwner={rootFolderOwner}
+						permissionType={folder.permissionType}
+						iconBtnProps={{
+							size: "sm",
+							colorScheme: "blue",
+						}}
 					/>
-				)}
-				{folder.permissionType === "WRITE" && (
-					<DeleteFolderButton
-						folder={folder}
-						parentFolderId={parentFolderId}
-					/>
-				)}
+					{folder.permissionType === "WRITE" && (
+						<RenameFolderButton
+							folder={folder}
+							parentFolderId={parentFolderId}
+							queriesToInvalidate={[
+								["folder", parentFolderId, "contents"],
+							]}
+							colorScheme="blue"
+						/>
+					)}
+					{folder.permissionType === "WRITE" && (
+						<DeleteFolderButton
+							folder={folder}
+							parentFolderId={parentFolderId}
+						/>
+					)}
+				</HStack>
 			</Td>
 		</Tr>
 	);

@@ -2,10 +2,7 @@ package com.akshit.api.service;
 
 import com.akshit.api.entity.*;
 import com.akshit.api.exception.ApiException;
-import com.akshit.api.model.FileCreateRequest;
-import com.akshit.api.model.FileCreateResponse;
-import com.akshit.api.model.FileUpdateRequest;
-import com.akshit.api.model.User;
+import com.akshit.api.model.*;
 import com.akshit.api.repo.FileRepository;
 import com.akshit.api.repo.FileUploadRepository;
 import com.akshit.api.repo.FolderRepository;
@@ -23,7 +20,10 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class FileService {
@@ -45,6 +45,9 @@ public class FileService {
 
     @Autowired
     private S3Service s3Service;
+
+    @Autowired
+    private AuthService authService;
 
     @Transactional(propagation = Propagation.MANDATORY)
     public PermissionType getFilePermissionForUser(FileEntity file, User user){
@@ -144,5 +147,31 @@ public class FileService {
         fileWritePermissionRequiredValidation(permission);
 
         deleteFile(file.getId());
+    }
+
+    @Transactional
+    public List<PermissionResponse> getPermissionsGranted(Long fileId, User user){
+        FileEntity file = fileRepository.findFileEntityById(fileId);
+        fileExistenceRequiredValidation(file);
+
+        if(!checkIfFileIsOwnedByUser(file, user))
+            throw new ApiException("Not allowed to get the permissions granted for this file", HttpStatus.FORBIDDEN);
+
+        List<CompletableFuture<PermissionResponse>> completableFutures = new ArrayList<>();
+        permissionRepository
+                .findAllByResourceIdAndResourceType(fileId, ResourceType.FILE)
+                .forEach(permission -> {
+                    completableFutures.add(PermissionResponse.fromPermissionEntity(
+                            permission,
+                            authService::getUserById,
+                            false));
+                });
+
+        FolderEntity parentFolder = folderRepository.findFolderEntityById(file.getParentFolderId());
+        completableFutures.addAll(folderService.getPermissionsGranted(parentFolder));
+        return completableFutures
+                .stream()
+                .map(CompletableFuture::join)
+                .toList();
     }
 }

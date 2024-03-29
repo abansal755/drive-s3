@@ -380,6 +380,22 @@ public class FolderService {
                 .build();
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
+    public List<CompletableFuture<PermissionResponse>> getPermissionsGranted(FolderEntity folder){
+        List<CompletableFuture<PermissionResponse>> completableFutures = new ArrayList<>();
+        forEachAncestor(folder, (current) -> {
+            List<PermissionEntity> permissions = permissionRepository.findAllByResourceIdAndResourceType(current.getId(), ResourceType.FOLDER);
+            permissions.forEach(permission -> {
+                completableFutures.add(PermissionResponse.fromPermissionEntity(
+                        permission,
+                        authService::getUserById,
+                        !current.getId().equals(folder.getId())));
+            });
+            return true;
+        });
+        return completableFutures;
+    }
+
     @Transactional
     public List<PermissionResponse> getPermissionsGranted(Long folderId, User user){
         FolderEntity folder = folderRepository.findFolderEntityById(folderId);
@@ -388,24 +404,7 @@ public class FolderService {
         if(!checkIfFolderIsOwnedByUser(folder, user))
             throw new ApiException("Not allowed to get the permissions granted for this folder", HttpStatus.FORBIDDEN);
 
-        List<CompletableFuture<PermissionResponse>> completableFutures = new ArrayList<>();
-        forEachAncestor(folder, (current) -> {
-            List<PermissionEntity> permissions = permissionRepository.findAllByResourceIdAndResourceType(current.getId(), ResourceType.FOLDER);
-            permissions.forEach(permission -> {
-                CompletableFuture<PermissionResponse> completableFuture = CompletableFuture
-                        .supplyAsync(() -> PermissionResponse
-                            .builder()
-                            .id(permission.getId())
-                            .createdAt(permission.getCreatedAt())
-                            .permissionType(permission.getPermissionType())
-                            .user(authService.getUserById(permission.getUserId()))
-                            .grantedToAnAncestorFolder(!current.getId().equals(folderId))
-                            .build()
-                        );
-                completableFutures.add(completableFuture);
-            });
-            return true;
-        });
+        List<CompletableFuture<PermissionResponse>> completableFutures = getPermissionsGranted(folder);
         return completableFutures
                 .stream()
                 .map(CompletableFuture::join)

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/files")
@@ -42,5 +43,10 @@ public class FileController {
             @AuthenticationPrincipal User user)
     {
         fileService.deleteFile(fileId, user);
+    }
+
+    @GetMapping("{fileId}/permissions")
+    public List<PermissionResponse> getPermissionsGranted(@PathVariable Long fileId, @AuthenticationPrincipal User user){
+        return fileService.getPermissionsGranted(fileId, user);
     }
 }

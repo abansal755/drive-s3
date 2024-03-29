@@ -193,11 +193,11 @@ public class FolderService {
     @Transactional(propagation = Propagation.MANDATORY)
     public void deleteAllPermissionsInChildren(FolderEntity folder, User user, PermissionType permissionType){
         breadthFirstSearch(folder, (current) -> {
+            List<FileEntity> childFiles = getChildFiles(current);
+            childFiles.forEach(file -> permissionRepository.deleteAllByResourceIdAndResourceTypeAndPermissionTypeAndUserId(file.getId(), ResourceType.FILE, permissionType, user.getId()));
             if(current.getId().equals(folder.getId()))
                 return true;
             permissionRepository.deleteAllByResourceIdAndResourceTypeAndPermissionTypeAndUserId(current.getId(), ResourceType.FOLDER, permissionType, user.getId());
-            List<FileEntity> childFiles = getChildFiles(current);
-            childFiles.forEach(file -> permissionRepository.deleteAllByResourceIdAndResourceTypeAndPermissionTypeAndUserId(file.getId(), ResourceType.FILE, permissionType, user.getId()));
             return true;
         });
     }

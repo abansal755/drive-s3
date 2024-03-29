@@ -123,6 +123,14 @@ public class FileDownloadService {
         fileDownloadExistenceRequiredValidation(fileDownload);
         fileDownloadUserValidation(fileDownload, user);
 
+        DownloadStatus status = fileDownload.getStatus();
+        if(status == DownloadStatus.NOT_STARTED)
+            throw new ApiException("Download has not been started yet", HttpStatus.BAD_REQUEST);
+        if(status == DownloadStatus.DOWNLOADED)
+            throw new ApiException("Download has already been completed", HttpStatus.BAD_REQUEST);
+        if(status == DownloadStatus.ABORTED)
+            throw new ApiException("Download has already been aborted", HttpStatus.BAD_REQUEST);
+        
         fileDownload.setStatus(DownloadStatus.ABORTED);
         fileDownloadRepository.save(fileDownload);
     }

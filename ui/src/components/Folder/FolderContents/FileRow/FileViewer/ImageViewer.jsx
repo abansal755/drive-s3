@@ -1,5 +1,4 @@
 import {
-	Box,
 	Button,
 	Modal,
 	ModalBody,
@@ -11,15 +10,11 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import useDownloadFile from "../../../../../hooks/useDownloadFile";
-import escapeHTML from "escape-html";
-import { useTheme } from "@emotion/react";
-import Loading from "../../../../common/Loading";
 
-const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
+const ImageViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 	const { initiateDownloadMutation, status, abortMutation } =
 		useDownloadFile(file);
-	const [contents, setContents] = useState("");
-	const theme = useTheme();
+	const [contents, setContents] = useState([]);
 
 	useEffect(() => {
 		if (!isViewerOpen) return;
@@ -28,14 +23,11 @@ const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 				const { readable, writable } = new TransformStream();
 				const reader = readable.getReader();
 				initiateDownloadMutation.mutate(writable);
-				let contents = new Uint8Array(0);
 				while (true) {
 					const { value, done } = await reader.read();
 					if (done) break;
-					contents = new Uint8Array([...contents, ...value]);
+					setContents((prev) => [...prev, value]);
 				}
-				const textDecoder = new TextDecoder();
-				setContents(textDecoder.decode(contents));
 			} catch (err) {
 				console.error(err);
 			}
@@ -45,6 +37,7 @@ const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 	const closeBtnClickHandler = () => {
 		if (status === "DOWNLOADING") abortMutation.mutate();
 		else if (status === "DOWNLOADED") onViewerClose();
+		setContents([]);
 	};
 
 	useEffect(() => {
@@ -56,7 +49,7 @@ const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 			isOpen={isViewerOpen}
 			onClose={onViewerClose}
 			size="xl"
-			scrollBehavior="inside"
+			// scrollBehavior="inside"
 			closeOnOverlayClick={false}
 		>
 			<ModalOverlay />
@@ -66,15 +59,8 @@ const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 					{file.extension && `.${file.extension}`}
 				</ModalHeader>
 				<ModalBody>
-					{status !== "DOWNLOADED" && <Loading />}
-					{status === "DOWNLOADED" && (
-						<Box
-							bgColor={theme.colors.gray[800]}
-							p={3}
-							borderRadius={5}
-						>
-							<pre>{escapeHTML(contents)}</pre>
-						</Box>
+					{contents && (
+						<img src={URL.createObjectURL(new Blob(contents))} />
 					)}
 				</ModalBody>
 				<ModalFooter>
@@ -96,4 +82,4 @@ const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 	);
 };
 
-export default TextViewer;
+export default ImageViewer;

@@ -34,7 +34,7 @@ import { apiInstance } from "../../../lib/axios";
 import PermissionRow from "./FolderInfoButton/PermissionRow";
 import AddPermissionSelect from "./FolderInfoButton/AddPermissionSelect";
 import CopyLinkButton from "./FolderInfoButton/CopyLinkButton";
-import RootFolderLoading from "../../common/Loading";
+import Loading from "../../common/Loading";
 
 const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -50,7 +50,7 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 		isError,
 	} = useQuery({
 		queryKey: ["folder", folder.id, "permissions"],
-		enabled: isUserOwner,
+		enabled: isUserOwner && isOpen,
 		queryFn: async () => {
 			const res = await apiInstance.get(
 				`/api/v1/folders/${folder.id}/permissions`,
@@ -147,7 +147,7 @@ const FolderInfoButton = ({ folder, rootFolderOwner, permissionType }) => {
 									isUserOwner={isUserOwner}
 								/>
 							)}
-							{isLoading && <RootFolderLoading />}
+							{isLoading && <Loading />}
 							{isSuccess &&
 								permissions.map((permission) => (
 									<PermissionRow

@@ -184,7 +184,7 @@ public class FolderService {
     public void addPermissionTypeToFile(File file, PermissionType parentFolderPermission, User user){
         file.setPermissionType(parentFolderPermission);
         if(parentFolderPermission == PermissionType.READ){
-            PermissionEntity current = permissionRepository.findByResourceIdAndResourceTypeAndUserId(file.getId(), ResourceType.FOLDER, user.getId());
+            PermissionEntity current = permissionRepository.findByResourceIdAndResourceTypeAndUserId(file.getId(), ResourceType.FILE, user.getId());
             if(current != null && current.getPermissionType() == PermissionType.WRITE)
                 file.setPermissionType(PermissionType.WRITE);
         }

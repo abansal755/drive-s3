@@ -18,8 +18,9 @@ import { useTheme } from "@emotion/react";
 import mime from "mime-types";
 import { useMemo } from "react";
 import FileViewer from "./FileRow/FileViewer.jsx";
+import FileInfoButton from "./FileRow/FileInfoButton.jsx";
 
-const FileRow = ({ file, parentFolderId }) => {
+const FileRow = ({ file, parentFolderId, rootFolderOwner }) => {
 	const theme = useTheme();
 	const mimeType = useMemo(() => {
 		return mime.lookup(file.extension);
@@ -62,6 +63,10 @@ const FileRow = ({ file, parentFolderId }) => {
 			<Td>{file.sizeInBytes && prettyBytes(file.sizeInBytes)}</Td>
 			<Td>
 				<HStack spacing={3}>
+					<FileInfoButton
+						file={file}
+						rootFolderOwner={rootFolderOwner}
+					/>
 					{file.permissionType === "WRITE" && (
 						<RenameFileButton
 							file={file}

@@ -85,6 +85,7 @@ const FolderContents = ({ folderId, rootFolderOwner }) => {
 								file={file}
 								key={`file-${file.id}`}
 								parentFolderId={folderId}
+								rootFolderOwner={rootFolderOwner}
 							/>
 						))}
 					</Tbody>

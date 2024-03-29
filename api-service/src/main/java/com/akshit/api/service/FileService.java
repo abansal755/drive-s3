@@ -157,21 +157,32 @@ public class FileService {
         if(!checkIfFileIsOwnedByUser(file, user))
             throw new ApiException("Not allowed to get the permissions granted for this file", HttpStatus.FORBIDDEN);
 
-        List<CompletableFuture<PermissionResponse>> completableFutures = new ArrayList<>();
+        List<CompletableFuture<PermissionResponse>> filePermissions = new ArrayList<>();
         permissionRepository
                 .findAllByResourceIdAndResourceType(fileId, ResourceType.FILE)
                 .forEach(permission -> {
-                    completableFutures.add(PermissionResponse.fromPermissionEntity(
+                    filePermissions.add(PermissionResponse.fromPermissionEntity(
                             permission,
                             authService::getUserById,
                             false));
                 });
 
         FolderEntity parentFolder = folderRepository.findFolderEntityById(file.getParentFolderId());
-        completableFutures.addAll(folderService.getPermissionsGranted(parentFolder));
-        return completableFutures
+        List<CompletableFuture<PermissionResponse>> parentFolderPermissions = folderService.getPermissionsGranted(parentFolder);
+
+        List<PermissionResponse> response = new ArrayList<>(filePermissions
                 .stream()
                 .map(CompletableFuture::join)
-                .toList();
+                .toList());
+        response.addAll(
+                parentFolderPermissions
+                        .stream()
+                        .map(CompletableFuture::join)
+                        .peek(permissionResponse -> {
+                            permissionResponse.setGrantedToAnAncestorFolder(true);
+                        })
+                        .toList()
+        );
+        return response;
     }
 }

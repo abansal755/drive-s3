@@ -4,6 +4,7 @@ import com.akshit.api.entity.*;
 import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.PermissionCreateRequest;
 import com.akshit.api.model.PermissionModifyRequest;
+import com.akshit.api.model.PermissionResponse;
 import com.akshit.api.model.User;
 import com.akshit.api.repo.FileRepository;
 import com.akshit.api.repo.FolderRepository;
@@ -176,5 +177,13 @@ public class PermissionService {
             if(permissionType == PermissionType.WRITE)
                 folderService.deleteAllPermissionsInChildren(folder, new User(permission.getUserId()), PermissionType.WRITE);
         }
+    }
+
+    public List<PermissionResponse> getPermissionsGrantedToUser(User user) {
+        return permissionRepository
+                .findAllByUserId(user.getId())
+                .stream()
+                .map(permission -> PermissionResponse.fromPermissionEntity(permission, fileRepository::findFileEntityById, folderRepository::findFolderEntityById))
+                .toList();
     }
 }

@@ -15,4 +15,5 @@ public interface PermissionRepository extends JpaRepository<PermissionEntity, Lo
     public PermissionEntity findPermissionEntityById(Long permissionId);
     public List<PermissionEntity> findAllByResourceIdAndResourceType(Long resourceId, ResourceType resourceType);
     public void deleteAllByResourceIdAndResourceTypeAndPermissionTypeAndUserId(Long resourceId, ResourceType resourceType, PermissionType permissionType, Long userId);
+    public List<PermissionEntity> findAllByUserId(Long userId);
 }

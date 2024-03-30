@@ -19,7 +19,7 @@ const Folder = () => {
 	});
 
 	return (
-		<Container maxW="container.xl" h="100%" px={0} py={10}>
+		<Container maxW="container.xl" h="100%" py={10}>
 			<Stack
 				h="100%"
 				bgColor="gray.700"

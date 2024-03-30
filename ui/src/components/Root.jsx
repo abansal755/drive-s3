@@ -3,7 +3,6 @@ import {
 	Flex,
 	Box,
 	Container,
-	Heading,
 	Menu,
 	MenuButton,
 	Button,
@@ -11,11 +10,13 @@ import {
 	MenuItem,
 	Avatar,
 	Link as ChakraLink,
-	HStack,
+	Text,
 } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { Link as ReactRouterLink } from "react-router-dom";
+import HDDIcon from "../assets/icons/HDDIcon";
+import NavButton from "./Root/NavButton";
 
 const Root = () => {
 	const { user, logout } = useAuthContext();
@@ -30,15 +31,17 @@ const Root = () => {
 					flexDirection="row"
 					justifyContent="space-between"
 					alignItems="center"
-					px={0}
 				>
 					<ChakraLink
 						as={ReactRouterLink}
 						to="/"
 						fontWeight="bold"
 						fontSize="xl"
+						display="flex"
+						alignItems="center"
 					>
-						Drive
+						<HDDIcon boxSize={6} />
+						<Text>Drive</Text>
 					</ChakraLink>
 					<Menu>
 						<MenuButton
@@ -61,6 +64,7 @@ const Root = () => {
 			<Box flexGrow={1}>
 				<Outlet />
 			</Box>
+			<NavButton />
 		</Flex>
 	);
 };

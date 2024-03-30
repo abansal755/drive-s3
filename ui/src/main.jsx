@@ -18,6 +18,7 @@ import UnprotectedRoute from "./components/common/UnprotectedRoute";
 import Folder from "./components/Folder";
 import RootIndex from "./components/RootIndex";
 import File from "./components/File";
+import SharedWithMe from "./components/SharedWithMe";
 
 const router = createBrowserRouter(
 	createRoutesFromChildren(
@@ -27,6 +28,7 @@ const router = createBrowserRouter(
 					<Route element={<RootIndex />} index />
 					<Route path="folder/:folderId" element={<Folder />} />
 					<Route path="file/:fileId" element={<File />} />
+					<Route path="sharedWithMe" element={<SharedWithMe />} />
 				</Route>
 			</Route>
 			<Route element={<UnprotectedRoute />}>

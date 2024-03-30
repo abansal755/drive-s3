@@ -20,14 +20,19 @@ public class File {
     private Long sizeInBytes;
     private PermissionType permissionType;
 
-    public static File fromEntity(FileEntity file){
+    private User owner;
+
+    public static File.FileBuilder getBuilderFromFileEntity(FileEntity file){
         return File
                 .builder()
                 .id(file.getId())
                 .name(file.getName())
                 .extension(file.getExtension())
                 .createdAt(file.getCreatedAt())
-                .sizeInBytes(file.getSizeInBytes())
-                .build();
+                .sizeInBytes(file.getSizeInBytes());
+    }
+
+    public static File fromEntity(FileEntity file){
+        return getBuilderFromFileEntity(file).build();
     }
 }

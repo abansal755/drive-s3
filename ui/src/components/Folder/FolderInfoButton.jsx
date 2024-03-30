@@ -105,7 +105,9 @@ const FolderInfoButton = ({
 						/>
 					</ModalBody>
 					<ModalFooter>
-						<CopyLinkButton />
+						<CopyLinkButton
+							copyValue={`${window.location.origin}/folder/${folder.id}`}
+						/>
 						<Button onClick={onClose}>Close</Button>
 					</ModalFooter>
 				</ModalContent>

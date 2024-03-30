@@ -17,6 +17,7 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import UnprotectedRoute from "./components/common/UnprotectedRoute";
 import Folder from "./components/Folder";
 import RootIndex from "./components/RootIndex";
+import File from "./components/File";
 
 const router = createBrowserRouter(
 	createRoutesFromChildren(
@@ -25,14 +26,15 @@ const router = createBrowserRouter(
 				<Route path="/" element={<Root />}>
 					<Route element={<RootIndex />} index />
 					<Route path="folder/:folderId" element={<Folder />} />
+					<Route path="file/:fileId" element={<File />} />
 				</Route>
 			</Route>
 			<Route element={<UnprotectedRoute />}>
 				<Route path="login" element={<Login />} />
 				<Route path="register" element={<Register />} />
 			</Route>
-		</Fragment>
-	)
+		</Fragment>,
+	),
 );
 
 const config = {
@@ -58,5 +60,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 				</ChakraProvider>
 			</AuthContextProvider>
 		</QueryClientProvider>
-	</React.StrictMode>
+	</React.StrictMode>,
 );

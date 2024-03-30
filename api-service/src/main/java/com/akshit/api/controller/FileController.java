@@ -49,4 +49,9 @@ public class FileController {
     public List<PermissionResponse> getPermissionsGranted(@PathVariable Long fileId, @AuthenticationPrincipal User user){
         return fileService.getPermissionsGranted(fileId, user);
     }
+
+    @GetMapping("{fileId}")
+    public File getFileDetails(@PathVariable Long fileId, @AuthenticationPrincipal User user){
+        return fileService.getFileDetails(fileId, user);
+    }
 }

@@ -22,7 +22,7 @@ const Icon = ({ isClicked }) => {
 	);
 };
 
-const CopyLinkButton = () => {
+const CopyLinkButton = ({ copyValue }) => {
 	const copyToClipboard = useCopyToClipboard()[1];
 	const [isClicked, setIsClicked] = useState(false);
 
@@ -31,7 +31,7 @@ const CopyLinkButton = () => {
 	}, [isClicked]);
 
 	const btnClickHandler = () => {
-		copyToClipboard(window.location);
+		copyToClipboard(copyValue);
 		setIsClicked(true);
 	};
 

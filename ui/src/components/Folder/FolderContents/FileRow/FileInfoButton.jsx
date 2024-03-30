@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Fragment } from "react";
 import { useAuthContext } from "../../../../context/AuthContext";
 import { apiInstance } from "../../../../lib/axios";
+import CopyLinkButton from "../../FolderInfoButton/CopyLinkButton";
 import PermissionsList from "../../FolderInfoButton/PermissionsList";
 import FileAttributes from "./FileInfoButton/FileAttributes";
 
@@ -74,6 +75,9 @@ const FileInfoButton = ({ file, rootFolderOwner }) => {
 						/>
 					</ModalBody>
 					<ModalFooter>
+						<CopyLinkButton
+							copyValue={`${window.location.origin}/file/${file.id}`}
+						/>
 						<Button onClick={onClose}>Close</Button>
 					</ModalFooter>
 				</ModalContent>

@@ -3,6 +3,7 @@ package com.akshit.api.service;
 import com.akshit.api.entity.*;
 import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.*;
+import com.akshit.api.model.File;
 import com.akshit.api.repo.FileRepository;
 import com.akshit.api.repo.FileUploadRepository;
 import com.akshit.api.repo.FolderRepository;
@@ -184,5 +185,22 @@ public class FileService {
                         .toList()
         );
         return response;
+    }
+
+    @Transactional
+    public File getFileDetails(Long fileId, User user) {
+        FileEntity file = fileRepository.findFileEntityById(fileId);
+        fileExistenceRequiredValidation(file);
+
+        PermissionType permission = getFilePermissionForUser(file, user);
+        fileReadPermissionRequiredValidation(permission);
+
+        FolderEntity parentFolder = folderRepository.findFolderEntityById(file.getParentFolderId());
+        Long ownerId = folderService.getFolderOwnerId(parentFolder);
+
+        return File.getBuilderFromFileEntity(file)
+                .permissionType(permission)
+                .owner(authService.getUserById(ownerId))
+                .build();
     }
 }

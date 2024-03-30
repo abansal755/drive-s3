@@ -10,9 +10,12 @@ import {
 	MenuList,
 	MenuItem,
 	Avatar,
+	Link as ChakraLink,
+	HStack,
 } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
+import { Link as ReactRouterLink } from "react-router-dom";
 
 const Root = () => {
 	const { user, logout } = useAuthContext();
@@ -27,8 +30,16 @@ const Root = () => {
 					flexDirection="row"
 					justifyContent="space-between"
 					alignItems="center"
+					px={0}
 				>
-					<Heading size="md">Drive</Heading>
+					<ChakraLink
+						as={ReactRouterLink}
+						to="/"
+						fontWeight="bold"
+						fontSize="xl"
+					>
+						Drive
+					</ChakraLink>
 					<Menu>
 						<MenuButton
 							as={Button}

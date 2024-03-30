@@ -1,14 +1,14 @@
+import { useMemo } from "react";
 import FileCannotBeViewed from "./FileViewer/FileCannotBeViewed";
 import ImageViewer from "./FileViewer/ImageViewer";
 import TextViewer from "./FileViewer/TextViewer";
+import mime from "mime-types";
 
-const FileViewer = ({
-	file,
-	mimeType,
-	isViewerOpen,
-	onViewerOpen,
-	onViewerClose,
-}) => {
+const FileViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
+	const mimeType = useMemo(() => {
+		return mime.lookup(file.extension);
+	}, [file.extension]);
+
 	if (mimeType.startsWith("text") && file.sizeInBytes <= 5 * 1000 * 1000)
 		return (
 			<TextViewer

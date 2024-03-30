@@ -22,9 +22,6 @@ import FileInfoButton from "./FileRow/FileInfoButton.jsx";
 
 const FileRow = ({ file, parentFolderId, rootFolderOwner }) => {
 	const theme = useTheme();
-	const mimeType = useMemo(() => {
-		return mime.lookup(file.extension);
-	}, [file.extension]);
 	const {
 		isOpen: isViewerOpen,
 		onOpen: onViewerOpen,
@@ -52,7 +49,6 @@ const FileRow = ({ file, parentFolderId, rootFolderOwner }) => {
 				</Button>
 				<FileViewer
 					file={file}
-					mimeType={mimeType}
 					isViewerOpen={isViewerOpen}
 					onViewerOpen={onViewerOpen}
 					onViewerClose={onViewerClose}

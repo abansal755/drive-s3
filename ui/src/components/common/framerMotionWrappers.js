@@ -10,6 +10,7 @@ import {
 	Stack as ChakraStack,
 	Heading as ChakraHeading,
 	Container as ChakraContainer,
+	WrapItem as ChakraWrapItem,
 } from "@chakra-ui/react";
 import {
 	CheckCircleIcon as ChakraCheckCircleIcon,
@@ -38,3 +39,4 @@ export const ChevronDownIcon = motion(ChakraChevronDownIcon);
 export const Stack = motion(ChakraStack);
 export const Heading = motion(ChakraHeading);
 export const Container = motion(ChakraContainer);
+export const WrapItem = motion(ChakraWrapItem);

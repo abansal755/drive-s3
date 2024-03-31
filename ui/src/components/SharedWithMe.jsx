@@ -1,22 +1,30 @@
 import {
 	Container,
 	HStack,
-	SimpleGrid,
 	Text,
 	VStack,
-	Link as ChakraLink,
+	Wrap,
+	Progress,
+	Alert,
+	AlertIcon,
+	AlertTitle,
+	AlertDescription,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { Fragment } from "react";
-import FileIcon from "../assets/icons/FileIcon";
-import FolderIcon from "../assets/icons/FolderIcon";
 import { useAuthContext } from "../context/AuthContext";
 import { apiInstance } from "../lib/axios";
-import { Link as ReactRouterLink } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import ResourceItem from "./SharedWithMe/ResourceItem";
 
 const SharedWithMe = () => {
 	const { user } = useAuthContext();
-	const { data: permissions, isSuccess } = useQuery({
+	const {
+		data: permissions,
+		isSuccess,
+		isLoading,
+		isError,
+		error,
+	} = useQuery({
 		queryKey: ["sharedWithMe", user.id],
 		queryFn: async () => {
 			const res = apiInstance.get("/api/v1/permissions");
@@ -36,8 +44,7 @@ const SharedWithMe = () => {
 			>
 				<HStack
 					bgColor="blue.700"
-					py={3}
-					px={4}
+					p={4}
 					display="flex"
 					justifyContent="space-between"
 					alignItems="center"
@@ -46,8 +53,32 @@ const SharedWithMe = () => {
 						Shared With Me
 					</Text>
 				</HStack>
-				<SimpleGrid
-					columns={[2, 4, 8]}
+				{!isError && (
+					<Progress
+						isIndeterminate
+						size="xs"
+						visibility={isLoading ? "visible" : "hidden"}
+					/>
+				)}
+				{isError && (
+					<Alert
+						status="error"
+						flexDir="column"
+						height="100%"
+						justifyContent="center"
+					>
+						<AlertIcon boxSize={8} />
+						<AlertTitle mt={4} mb={1} fontSize="lg">
+							Error fetching contents
+						</AlertTitle>
+						<AlertDescription>
+							{error && error.response && error.response.data
+								? error.response.data.message
+								: "Something went wrong"}
+						</AlertDescription>
+					</Alert>
+				)}
+				<Wrap
 					spacing={2}
 					p={8}
 					flexGrow={1}
@@ -56,38 +87,13 @@ const SharedWithMe = () => {
 					overflow="auto"
 					flexBasis={0}
 				>
-					{isSuccess &&
-						permissions.map((permission) => (
-							<VStack key={permission.id}>
-								{permission.resourceType === "FILE" && (
-									<Fragment>
-										<FileIcon boxSize="40px" />
-										<ChakraLink
-											as={ReactRouterLink}
-											wordBreak="break-all"
-											to={`/file/${permission.file.id}`}
-										>
-											{permission.file.name}
-											{permission.file.extension &&
-												`.${permission.file.extension}`}
-										</ChakraLink>
-									</Fragment>
-								)}
-								{permission.resourceType === "FOLDER" && (
-									<Fragment>
-										<FolderIcon boxSize="40px" />
-										<ChakraLink
-											as={ReactRouterLink}
-											wordBreak="break-all"
-											to={`/folder/${permission.folder.id}`}
-										>
-											{permission.folder.folderName}
-										</ChakraLink>
-									</Fragment>
-								)}
-							</VStack>
-						))}
-				</SimpleGrid>
+					<AnimatePresence>
+						{isSuccess &&
+							permissions.map((permission) => (
+								<ResourceItem permission={permission} />
+							))}
+					</AnimatePresence>
+				</Wrap>
 			</VStack>
 		</Container>
 	);

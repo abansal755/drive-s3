@@ -1,7 +1,7 @@
 import FolderIcon from "../../../assets/icons/FolderIcon.jsx";
 import RenameFolderButton from "../RenameFolderButton";
 import DeleteFolderButton from "./FolderRow/DeleteFolderButton.jsx";
-import { Td, Link as ChakraLink, Text, HStack } from "@chakra-ui/react";
+import { Td, Link as ChakraLink, Text, ButtonGroup } from "@chakra-ui/react";
 import { Tr } from "../../common/framerMotionWrappers";
 import { Link as ReactRouterLink } from "react-router-dom";
 import epochToDateString from "../../../utils/epochToDateString.js";
@@ -45,7 +45,7 @@ const FolderRow = ({ folder, parentFolderId, rootFolderOwner }) => {
 			<Td>{epochToDateString(folder.createdAt)}</Td>
 			<Td>{isSuccess && prettyBytes(sizeInBytes)}</Td>
 			<Td>
-				<HStack spacing={3}>
+				<ButtonGroup isAttached>
 					<FolderInfoButton
 						folder={folder}
 						rootFolderOwner={rootFolderOwner}
@@ -71,7 +71,7 @@ const FolderRow = ({ folder, parentFolderId, rootFolderOwner }) => {
 							parentFolderId={parentFolderId}
 						/>
 					)}
-				</HStack>
+				</ButtonGroup>
 			</Td>
 		</Tr>
 	);

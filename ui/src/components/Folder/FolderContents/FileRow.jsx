@@ -1,5 +1,5 @@
 import FileIcon from "../../../assets/icons/FileIcon.jsx";
-import { Td, HStack, useDisclosure, Button } from "@chakra-ui/react";
+import { Td, useDisclosure, Button, ButtonGroup } from "@chakra-ui/react";
 import { Tr } from "../../common/framerMotionWrappers";
 import prettyBytes from "pretty-bytes";
 import epochToDateString from "../../../utils/epochToDateString.js";
@@ -46,7 +46,7 @@ const FileRow = ({ file, parentFolderId, rootFolderOwner }) => {
 			<Td>{epochToDateString(file.createdAt)}</Td>
 			<Td>{file.sizeInBytes && prettyBytes(file.sizeInBytes)}</Td>
 			<Td>
-				<HStack spacing={3}>
+				<ButtonGroup isAttached>
 					<FileInfoButton
 						file={file}
 						rootFolderOwner={rootFolderOwner}
@@ -64,7 +64,7 @@ const FileRow = ({ file, parentFolderId, rootFolderOwner }) => {
 						/>
 					)}
 					<DownloadFileButton file={file} />
-				</HStack>
+				</ButtonGroup>
 			</Td>
 		</Tr>
 	);

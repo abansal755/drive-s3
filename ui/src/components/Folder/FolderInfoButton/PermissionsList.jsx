@@ -1,15 +1,17 @@
 import { Fragment } from "react";
-import {
-	Heading,
-	VStack,
-	Alert,
-	AlertIcon,
-	AlertTitle,
-} from "@chakra-ui/react";
+import { Heading, AlertIcon, AlertTitle } from "@chakra-ui/react";
+import { Alert, VStack } from "../../common/framerMotionWrappers";
 import PermissionRow from "./PermissionsList/PermissionRow";
 import AddPermissionSelect from "./PermissionsList/AddPermissionSelect";
 import Loading from "../../common/Loading";
 import { useAuthContext } from "../../../context/AuthContext";
+import { AnimatePresence } from "framer-motion";
+
+const framerProps = {
+	initial: { opacity: 0, scale: 0 },
+	animate: { opacity: 1, scale: 1 },
+	exit: { opacity: 0, scale: 0 },
+};
 
 const PermissionsList = ({
 	rootFolderOwner,
@@ -30,7 +32,7 @@ const PermissionsList = ({
 				Permissions
 			</Heading>
 			{isError && (
-				<Alert status="error" mb={2}>
+				<Alert status="error" mb={2} {...framerProps}>
 					<AlertIcon />
 					<AlertTitle>Error fetching permissions</AlertTitle>
 				</Alert>
@@ -41,7 +43,7 @@ const PermissionsList = ({
 					resourceType={resourceType}
 				/>
 			)}
-			<VStack alignItems="start" spacing={0}>
+			<VStack alignItems="start" spacing={0} layout>
 				<PermissionRow
 					permission={{
 						user: rootFolderOwner,
@@ -58,17 +60,19 @@ const PermissionsList = ({
 						isUserOwner={isUserOwner}
 					/>
 				)}
-				{isLoading && <Loading />}
-				{isSuccess &&
-					permissions.map((permission) => (
-						<PermissionRow
-							key={permission.id}
-							permission={permission}
-							isUserOwner={isUserOwner}
-							resource={resource}
-							resourceType={resourceType}
-						/>
-					))}
+				{isLoading && <Loading key="loading" />}
+				<AnimatePresence>
+					{isSuccess &&
+						permissions.map((permission) => (
+							<PermissionRow
+								key={permission.id}
+								permission={permission}
+								isUserOwner={isUserOwner}
+								resource={resource}
+								resourceType={resourceType}
+							/>
+						))}
+				</AnimatePresence>
 			</VStack>
 		</Fragment>
 	);

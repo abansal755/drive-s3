@@ -1,22 +1,17 @@
-import {
-	CloseIcon,
-	TriangleDownIcon,
-	TriangleUpIcon,
-	WarningTwoIcon,
-} from "@chakra-ui/icons";
-import {
-	VStack,
-	Text,
-	Avatar,
-	HStack,
-	Badge,
-	Tooltip,
-	IconButton,
-} from "@chakra-ui/react";
+import { CloseIcon, WarningTwoIcon } from "@chakra-ui/icons";
+import { VStack, Text, Avatar, Tooltip, IconButton } from "@chakra-ui/react";
+import { HStack, Badge } from "../../../common/framerMotionWrappers";
 import { useTheme } from "@emotion/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../context/AuthContext";
 import { apiInstance } from "../../../../lib/axios";
+import ModifyPermissionButton from "./PermissionRow/ModifyPermissionButton";
+
+const framerProps = {
+	initial: { opacity: 0, scale: 0 },
+	animate: { opacity: 1, scale: 1 },
+	exit: { opacity: 0, scale: 0 },
+};
 
 const PermissionRow = ({ permission, isUserOwner, resource, resourceType }) => {
 	const { user } = useAuthContext();
@@ -60,15 +55,12 @@ const PermissionRow = ({ permission, isUserOwner, resource, resourceType }) => {
 			key={permission.user.id}
 			justifyContent="space-between"
 			width="100%"
-			sx={{
-				":hover": {
-					bgColor: theme.colors.blue[800],
-				},
-			}}
 			px={3}
 			py={2}
 			borderRadius={3}
-			transition="200ms"
+			whileHover={{ backgroundColor: theme.colors.blue[800] }}
+			{...framerProps}
+			layout
 		>
 			<HStack>
 				<Avatar
@@ -79,16 +71,24 @@ const PermissionRow = ({ permission, isUserOwner, resource, resourceType }) => {
 					<HStack mb={-1}>
 						<Text fontSize="md">{`${permission.user.firstName} ${permission.user.lastName}`}</Text>
 						{permission.permissionType === "READ" && (
-							<Badge colorScheme="green">Read</Badge>
+							<Badge colorScheme="green" {...framerProps}>
+								Read
+							</Badge>
 						)}
 						{permission.permissionType === "WRITE" && (
-							<Badge colorScheme="orange">Write</Badge>
+							<Badge colorScheme="orange" {...framerProps}>
+								Write
+							</Badge>
 						)}
 						{permission.permissionType === "OWNER" && (
-							<Badge colorScheme="red">Owner</Badge>
+							<Badge colorScheme="red" {...framerProps}>
+								Owner
+							</Badge>
 						)}
 						{permission.user.id === user.id && (
-							<Badge colorScheme="purple">You</Badge>
+							<Badge colorScheme="purple" {...framerProps}>
+								You
+							</Badge>
 						)}
 					</HStack>
 					<Text fontSize="sm">{permission.user.email}</Text>
@@ -104,36 +104,11 @@ const PermissionRow = ({ permission, isUserOwner, resource, resourceType }) => {
 							/>
 						</Tooltip>
 					)}
-					{permission.permissionType === "READ" && (
-						<Tooltip label="Upgrade permission to WRITE">
-							<IconButton
-								icon={<TriangleUpIcon />}
-								isRound
-								size="sm"
-								colorScheme="purple"
-								onClick={() =>
-									modifyPermissionMutation.mutate("WRITE")
-								}
-								isLoading={modifyPermissionMutation.isPending}
-								isDisabled={deletePermissionMutation.isPending}
-							/>
-						</Tooltip>
-					)}
-					{permission.permissionType === "WRITE" && (
-						<Tooltip label="Downgrade permission to READ">
-							<IconButton
-								icon={<TriangleDownIcon />}
-								isRound
-								size="sm"
-								colorScheme="purple"
-								onClick={() =>
-									modifyPermissionMutation.mutate("READ")
-								}
-								isLoading={modifyPermissionMutation.isPending}
-								isDisabled={deletePermissionMutation.isPending}
-							/>
-						</Tooltip>
-					)}
+					<ModifyPermissionButton
+						permissionType={permission.permissionType}
+						modifyPermissionMutation={modifyPermissionMutation}
+						deletePermissionMutation={deletePermissionMutation}
+					/>
 					<Tooltip label="Revoke Access">
 						<IconButton
 							icon={<CloseIcon />}

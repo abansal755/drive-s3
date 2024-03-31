@@ -1,24 +1,31 @@
-import { CheckCircleIcon, ExternalLinkIcon } from "@chakra-ui/icons";
-import { Box, Button } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
+import {
+	Text,
+	CheckCircleIcon,
+	CopyIcon,
+} from "../../common/framerMotionWrappers";
 import { useCopyToClipboard } from "@uidotdev/usehooks";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 const Icon = ({ isClicked }) => {
 	return (
-		<Box display="block" position="relative" bottom={2} right={1} ml={1}>
-			<CheckCircleIcon
-				position="absolute"
-				opacity={isClicked ? 1 : 0}
-				transition="300ms"
-				transform={`rotate(${isClicked ? 0 : -180}deg)`}
-			/>
-			<ExternalLinkIcon
-				position="absolute"
-				opacity={isClicked ? 0 : 1}
-				transition="300ms"
-				transform={`rotate(${isClicked ? 180 : 0}deg)`}
-			/>
-		</Box>
+		<Fragment>
+			{isClicked && (
+				<CheckCircleIcon
+					key="check-circle-icon"
+					initial={{ opacity: 0, scale: 0 }}
+					animate={{ opacity: 1, scale: 1 }}
+					exit={{ opacity: 0, scale: 0 }}
+				/>
+			)}
+			{!isClicked && (
+				<CopyIcon
+					initial={{ opacity: 0, scale: 0 }}
+					animate={{ opacity: 1, scale: 1 }}
+					exit={{ opacity: 0, scale: 0 }}
+				/>
+			)}
+		</Fragment>
 	);
 };
 
@@ -42,9 +49,26 @@ const CopyLinkButton = ({ copyValue }) => {
 			mr={2}
 			onClick={btnClickHandler}
 			pr={6}
-			transition="300ms"
 		>
-			{isClicked ? "Copied Link" : "Copy Link"}
+			{isClicked && (
+				<Text
+					initial={{ opacity: 0, scale: 0 }}
+					animate={{ opacity: 1, scale: 1 }}
+					exit={{ opacity: 0, scale: 0 }}
+				>
+					Copied
+				</Text>
+			)}
+			{!isClicked && (
+				<Text
+					initial={{ opacity: 0, scale: 0 }}
+					animate={{ opacity: 1, scale: 1 }}
+					exit={{ opacity: 0, scale: 0 }}
+				>
+					Copy
+				</Text>
+			)}
+			<Text ml={1}>Link</Text>
 		</Button>
 	);
 };

@@ -14,7 +14,6 @@ import {
 	HStack,
 	ChevronDownIcon,
 } from "../../../common/framerMotionWrappers";
-import { ChevronUpIcon } from "@chakra-ui/icons";
 import { useTheme } from "@emotion/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -103,15 +102,13 @@ const AddPermissionSelect = ({ resource, resourceType }) => {
 						<Button size="xs" onClick={() => setSearchText("")}>
 							Clear
 						</Button>
-						{/* {isSelectVisible && <ChevronUpIcon />} */}
-						{/* {!isSelectVisible && <ChevronDownIcon />} */}
 						<ChevronDownIcon
 							variants={{
 								visible: {
-									rotate: 0,
+									rotate: 180,
 								},
 								hidden: {
-									rotate: 180,
+									rotate: 0,
 								},
 							}}
 							animate={isSelectVisible ? "visible" : "hidden"}

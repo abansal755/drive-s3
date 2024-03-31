@@ -20,7 +20,7 @@ const FileAttributes = ({ file }) => {
 				</Tr>
 				{file.extension && (
 					<Tr>
-						<Td>File Extension</Td>
+						<Td>File Extension:</Td>
 						<Td>{file.extension}</Td>
 					</Tr>
 				)}

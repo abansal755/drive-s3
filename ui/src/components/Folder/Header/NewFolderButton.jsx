@@ -11,6 +11,7 @@ import {
 	ModalOverlay,
 	useDisclosure,
 } from "@chakra-ui/react";
+import FolderIcon from "../../../assets/icons/FolderIcon";
 import { Fragment, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "../../../lib/axios.js";
@@ -47,7 +48,9 @@ const NewFolderButton = ({ folderId }) => {
 
 	return (
 		<Fragment>
-			<MenuItem onClick={onOpen}>Add a new folder</MenuItem>
+			<MenuItem onClick={onOpen} icon={<FolderIcon boxSize={4} />}>
+				Add a new folder
+			</MenuItem>
 			<Modal
 				isOpen={isOpen}
 				onClose={modalCloseHandler}

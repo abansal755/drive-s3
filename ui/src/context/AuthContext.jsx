@@ -81,7 +81,15 @@ export const AuthContextProvider = ({ children }) => {
 
 	const logoutMutation = useMutation({
 		mutationFn: () => authInstance.post("/api/v1/users/logout"),
-		onSuccess: () => queryClient.setQueryData(["user"], null),
+		onSuccess: () => {
+			queryClient.setQueryData(["user"], null);
+			queryClient.removeQueries({
+				queryKey: ["folder"],
+			});
+			queryClient.removeQueries({
+				queryKey: ["file"],
+			});
+		},
 	});
 
 	return (

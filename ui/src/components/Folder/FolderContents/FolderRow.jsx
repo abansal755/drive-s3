@@ -1,7 +1,8 @@
 import FolderIcon from "../../../assets/icons/FolderIcon.jsx";
 import RenameFolderButton from "../RenameFolderButton";
 import DeleteFolderButton from "./FolderRow/DeleteFolderButton.jsx";
-import { Tr, Td, Link as ChakraLink, Text, HStack } from "@chakra-ui/react";
+import { Td, Link as ChakraLink, Text, HStack } from "@chakra-ui/react";
+import { Tr } from "../../common/framerMotionWrappers";
 import { Link as ReactRouterLink } from "react-router-dom";
 import epochToDateString from "../../../utils/epochToDateString.js";
 import { useQuery } from "@tanstack/react-query";
@@ -25,12 +26,10 @@ const FolderRow = ({ folder, parentFolderId, rootFolderOwner }) => {
 
 	return (
 		<Tr
-			transition="200ms"
-			sx={{
-				":hover": {
-					bgColor: theme.colors.blue[800],
-				},
-			}}
+			whileHover={{ backgroundColor: theme.colors.blue[800] }}
+			initial={{ opacity: 0, x: "-20%" }}
+			animate={{ opacity: 1, x: 0 }}
+			layout
 		>
 			<Td>
 				<ChakraLink

@@ -1,22 +1,12 @@
 import FileIcon from "../../../assets/icons/FileIcon.jsx";
-import {
-	Tr,
-	Td,
-	Link as ChakraLink,
-	Text,
-	HStack,
-	useDisclosure,
-	Button,
-} from "@chakra-ui/react";
-import { Link as ReactRouterLink } from "react-router-dom";
+import { Td, HStack, useDisclosure, Button } from "@chakra-ui/react";
+import { Tr } from "../../common/framerMotionWrappers";
 import prettyBytes from "pretty-bytes";
 import epochToDateString from "../../../utils/epochToDateString.js";
 import RenameFileButton from "./FileRow/RenameFileButton.jsx";
 import DeleteFileButton from "./FileRow/DeleteFileButton.jsx";
 import DownloadFileButton from "./FileRow/DownloadFileButton.jsx";
 import { useTheme } from "@emotion/react";
-import mime from "mime-types";
-import { useMemo } from "react";
 import FileViewer from "./FileRow/FileViewer.jsx";
 import FileInfoButton from "./FileRow/FileInfoButton.jsx";
 
@@ -30,12 +20,10 @@ const FileRow = ({ file, parentFolderId, rootFolderOwner }) => {
 
 	return (
 		<Tr
-			transition="200ms"
-			sx={{
-				":hover": {
-					bgColor: theme.colors.blue[800],
-				},
-			}}
+			whileHover={{ backgroundColor: theme.colors.blue[800] }}
+			initial={{ opacity: 0, x: "-20%" }}
+			animate={{ opacity: 1, x: 0 }}
+			layout
 		>
 			<Td>
 				<Button

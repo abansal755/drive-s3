@@ -34,7 +34,8 @@ const FolderContents = ({ folderId, rootFolderOwner }) => {
 			flexGrow={1}
 			flexShrink={1}
 			minH={0}
-			overflow="auto"
+			overflowY="auto"
+			overflowX="hidden"
 			flexBasis={0}
 		>
 			{!isError && (

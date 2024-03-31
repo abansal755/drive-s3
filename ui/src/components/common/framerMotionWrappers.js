@@ -6,6 +6,7 @@ import {
 	IconButton as ChakraIconButton,
 	Alert as ChakraAlert,
 	VStack as ChakraVStack,
+	Tr as ChakraTr,
 } from "@chakra-ui/react";
 import {
 	CheckCircleIcon as ChakraCheckCircleIcon,
@@ -13,6 +14,7 @@ import {
 	CopyIcon as ChakraCopyIcon,
 	TriangleUpIcon as ChakraTriangleUpIcon,
 	TriangleDownIcon as ChakraTriangleDownIcon,
+	ChevronDownIcon as ChakraChevronDownIcon,
 } from "@chakra-ui/icons";
 import { motion } from "framer-motion";
 
@@ -28,3 +30,5 @@ export const TriangleUpIcon = motion(ChakraTriangleUpIcon);
 export const TriangleDownIcon = motion(ChakraTriangleDownIcon);
 export const Alert = motion(ChakraAlert);
 export const VStack = motion(ChakraVStack);
+export const Tr = motion(ChakraTr);
+export const ChevronDownIcon = motion(ChakraChevronDownIcon);

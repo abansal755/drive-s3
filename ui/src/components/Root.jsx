@@ -24,7 +24,7 @@ const Root = () => {
 
 	return (
 		<Flex h="100vh" w="100vw" flexDirection="column">
-			<Box bgColor="teal" py={3}>
+			<Box bgColor="blue.700" py={3}>
 				<Container
 					maxW="container.xl"
 					display="flex"

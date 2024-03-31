@@ -35,7 +35,7 @@ const SharedWithMe = () => {
 				alignItems="stretch"
 			>
 				<HStack
-					bgColor="cyan.700"
+					bgColor="blue.700"
 					py={3}
 					px={4}
 					display="flex"

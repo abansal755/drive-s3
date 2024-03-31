@@ -91,7 +91,7 @@ const Register = () => {
 						onChange={(e) => setConfirmPassword(e.target.value)}
 					/>
 					<Button
-						colorScheme="teal"
+						colorScheme="blue"
 						type="submit"
 						isLoading={register.isPending}
 					>

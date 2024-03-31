@@ -69,7 +69,7 @@ const NewFolderButton = ({ folderId }) => {
 					<ModalFooter>
 						<Button
 							mr={3}
-							colorScheme="teal"
+							colorScheme="blue"
 							type="submit"
 							isLoading={mutation.isPending}
 							loadingText="Creating"

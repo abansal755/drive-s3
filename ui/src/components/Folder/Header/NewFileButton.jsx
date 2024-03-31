@@ -181,7 +181,7 @@ const NewFileButton = ({ folderId }) => {
 					<ModalFooter>
 						<Button
 							mr={3}
-							colorScheme="teal"
+							colorScheme="blue"
 							type="submit"
 							isDisabled={disabled}
 							onClick={() =>

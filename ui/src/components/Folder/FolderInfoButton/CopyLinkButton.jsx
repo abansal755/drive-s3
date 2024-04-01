@@ -7,24 +7,17 @@ import {
 import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { Fragment, useEffect, useState } from "react";
 
+const framerProps = {
+	initial: { opacity: 0, scale: 0 },
+	animate: { opacity: 1, scale: 1 },
+	exit: { opacity: 0, scale: 0 },
+};
+
 const Icon = ({ isClicked }) => {
 	return (
 		<Fragment>
-			{isClicked && (
-				<CheckCircleIcon
-					key="check-circle-icon"
-					initial={{ opacity: 0, scale: 0 }}
-					animate={{ opacity: 1, scale: 1 }}
-					exit={{ opacity: 0, scale: 0 }}
-				/>
-			)}
-			{!isClicked && (
-				<CopyIcon
-					initial={{ opacity: 0, scale: 0 }}
-					animate={{ opacity: 1, scale: 1 }}
-					exit={{ opacity: 0, scale: 0 }}
-				/>
-			)}
+			{isClicked && <CheckCircleIcon {...framerProps} />}
+			{!isClicked && <CopyIcon {...framerProps} />}
 		</Fragment>
 	);
 };
@@ -50,25 +43,8 @@ const CopyLinkButton = ({ copyValue }) => {
 			onClick={btnClickHandler}
 			pr={6}
 		>
-			{isClicked && (
-				<Text
-					initial={{ opacity: 0, scale: 0 }}
-					animate={{ opacity: 1, scale: 1 }}
-					exit={{ opacity: 0, scale: 0 }}
-				>
-					Copied
-				</Text>
-			)}
-			{!isClicked && (
-				<Text
-					initial={{ opacity: 0, scale: 0 }}
-					animate={{ opacity: 1, scale: 1 }}
-					exit={{ opacity: 0, scale: 0 }}
-				>
-					Copy
-				</Text>
-			)}
-			<Text ml={1}>Link</Text>
+			{isClicked && <Text {...framerProps}>Copied Link</Text>}
+			{!isClicked && <Text {...framerProps}>Copy Link</Text>}
 		</Button>
 	);
 };

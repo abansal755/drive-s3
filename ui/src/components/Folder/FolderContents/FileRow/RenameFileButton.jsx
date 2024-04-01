@@ -90,7 +90,7 @@ const RenameFileButton = ({ file, parentFolderId }) => {
 					<ModalFooter>
 						<Button
 							mr={3}
-							colorScheme="teal"
+							colorScheme="blue"
 							type="submit"
 							isLoading={mutation.isPending}
 							loadingText="Renaming"

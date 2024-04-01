@@ -75,7 +75,7 @@ const Login = () => {
 						</InputRightElement>
 					</InputGroup>
 					<Button
-						colorScheme="teal"
+						colorScheme="blue"
 						type="submit"
 						isLoading={login.isPending}
 					>

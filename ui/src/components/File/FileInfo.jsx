@@ -42,7 +42,7 @@ const FileInfo = ({ file }) => {
 			flexGrow={0.5}
 			alignItems="stretch"
 		>
-			<HStack bgColor="cyan.700" py={3} px={6}>
+			<HStack bgColor="blue.700" py={3} px={6}>
 				<Text fontSize="xl">File Info</Text>
 			</HStack>
 			<VStack p={6} alignItems="stretch">

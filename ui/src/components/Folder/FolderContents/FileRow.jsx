@@ -7,6 +7,7 @@ import {
 	HStack,
 	useDisclosure,
 	Button,
+	ButtonGroup,
 } from "@chakra-ui/react";
 import { Link as ReactRouterLink } from "react-router-dom";
 import prettyBytes from "pretty-bytes";
@@ -58,7 +59,7 @@ const FileRow = ({ file, parentFolderId, rootFolderOwner }) => {
 			<Td>{epochToDateString(file.createdAt)}</Td>
 			<Td>{file.sizeInBytes && prettyBytes(file.sizeInBytes)}</Td>
 			<Td>
-				<HStack spacing={3}>
+				<ButtonGroup isAttached>
 					<FileInfoButton
 						file={file}
 						rootFolderOwner={rootFolderOwner}
@@ -76,7 +77,7 @@ const FileRow = ({ file, parentFolderId, rootFolderOwner }) => {
 						/>
 					)}
 					<DownloadFileButton file={file} />
-				</HStack>
+				</ButtonGroup>
 			</Td>
 		</Tr>
 	);

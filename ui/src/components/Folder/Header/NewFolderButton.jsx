@@ -14,6 +14,7 @@ import {
 import { Fragment, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "../../../lib/axios.js";
+import FolderIcon from "../../../assets/icons/FolderIcon";
 
 const NewFolderButton = ({ folderId }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -47,7 +48,9 @@ const NewFolderButton = ({ folderId }) => {
 
 	return (
 		<Fragment>
-			<MenuItem onClick={onOpen}>Add a new folder</MenuItem>
+			<MenuItem onClick={onOpen} icon={<FolderIcon boxSize={4} />}>
+				Add a new folder
+			</MenuItem>
 			<Modal
 				isOpen={isOpen}
 				onClose={modalCloseHandler}
@@ -69,7 +72,7 @@ const NewFolderButton = ({ folderId }) => {
 					<ModalFooter>
 						<Button
 							mr={3}
-							colorScheme="teal"
+							colorScheme="blue"
 							type="submit"
 							isLoading={mutation.isPending}
 							loadingText="Creating"

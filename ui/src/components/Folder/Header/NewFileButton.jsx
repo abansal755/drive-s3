@@ -19,6 +19,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "../../../lib/axios.js";
 import prettyBytes from "pretty-bytes";
+import FileIcon from "../../../assets/icons/FileIcon";
 
 const getNameAndExtensionFromFullName = (fileName) => {
 	let name = "";
@@ -125,7 +126,9 @@ const NewFileButton = ({ folderId }) => {
 
 	return (
 		<Fragment>
-			<MenuItem onClick={onOpen}>Upload a new file</MenuItem>
+			<MenuItem onClick={onOpen} icon={<FileIcon boxSize={4} />}>
+				Upload a new file
+			</MenuItem>
 			<Modal
 				isOpen={isOpen}
 				onClose={modalCloseHandler}
@@ -181,7 +184,7 @@ const NewFileButton = ({ folderId }) => {
 					<ModalFooter>
 						<Button
 							mr={3}
-							colorScheme="teal"
+							colorScheme="blue"
 							type="submit"
 							isDisabled={disabled}
 							onClick={() =>

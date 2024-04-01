@@ -11,7 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import useDownloadFile from "../../../../../hooks/useDownloadFile";
-import escapeHTML from "escape-html";
 import { useTheme } from "@emotion/react";
 import Loading from "../../../../common/Loading";
 
@@ -75,7 +74,7 @@ const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 							w="fit-content"
 							minW="100%"
 						>
-							<pre>{escapeHTML(contents)}</pre>
+							<pre>{contents}</pre>
 						</Box>
 					)}
 				</ModalBody>

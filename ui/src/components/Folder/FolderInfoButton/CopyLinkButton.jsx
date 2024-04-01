@@ -1,25 +1,16 @@
-import { Button } from "@chakra-ui/react";
 import {
 	Text,
 	CheckCircleIcon,
 	CopyIcon,
+	Button,
+	Box,
 } from "../../common/framerMotionWrappers";
-import { useCopyToClipboard } from "@uidotdev/usehooks";
-import { Fragment, useEffect, useState } from "react";
+import { useCopyToClipboard, useMeasure } from "@uidotdev/usehooks";
+import { useEffect, useState } from "react";
 
-const framerProps = {
-	initial: { opacity: 0, scale: 0 },
-	animate: { opacity: 1, scale: 1 },
-	exit: { opacity: 0, scale: 0 },
-};
-
-const Icon = ({ isClicked }) => {
-	return (
-		<Fragment>
-			{isClicked && <CheckCircleIcon {...framerProps} />}
-			{!isClicked && <CopyIcon {...framerProps} />}
-		</Fragment>
-	);
+const variants = {
+	visible: { opacity: 1, scale: 1 },
+	hidden: { opacity: 0, scale: 0 },
 };
 
 const CopyLinkButton = ({ copyValue }) => {
@@ -35,16 +26,42 @@ const CopyLinkButton = ({ copyValue }) => {
 		setIsClicked(true);
 	};
 
+	const [ref, { width }] = useMeasure();
+
 	return (
 		<Button
 			colorScheme={isClicked ? "green" : "blue"}
-			rightIcon={<Icon isClicked={isClicked} />}
 			mr={2}
 			onClick={btnClickHandler}
-			pr={6}
 		>
-			{isClicked && <Text {...framerProps}>Copied Link</Text>}
-			{!isClicked && <Text {...framerProps}>Copy Link</Text>}
+			<Box
+				mr={2}
+				animate={{ width: width ? width : "auto" }}
+				overflow="hidden"
+			>
+				<Text
+					ref={ref}
+					w="fit-content"
+					animate={{ opacity: [0, 1] }}
+					key={isClicked}
+				>
+					{!isClicked && "Copy Link"}
+					{isClicked && "Copied Link"}
+				</Text>
+			</Box>
+			<Box display="flex" alignItems="center">
+				<CopyIcon
+					boxSize={4}
+					variants={variants}
+					animate={isClicked ? "hidden" : "visible"}
+					position="absolute"
+				/>
+				<CheckCircleIcon
+					boxSize={4}
+					variants={variants}
+					animate={isClicked ? "visible" : "hidden"}
+				/>
+			</Box>
 		</Button>
 	);
 };

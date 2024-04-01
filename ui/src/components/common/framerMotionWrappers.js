@@ -11,6 +11,7 @@ import {
 	Heading as ChakraHeading,
 	Container as ChakraContainer,
 	WrapItem as ChakraWrapItem,
+	Box as ChakraBox,
 } from "@chakra-ui/react";
 import {
 	CheckCircleIcon as ChakraCheckCircleIcon,
@@ -40,3 +41,4 @@ export const Stack = motion(ChakraStack);
 export const Heading = motion(ChakraHeading);
 export const Container = motion(ChakraContainer);
 export const WrapItem = motion(ChakraWrapItem);
+export const Box = motion(ChakraBox);

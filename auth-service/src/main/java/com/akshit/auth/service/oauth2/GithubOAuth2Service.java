@@ -5,9 +5,9 @@ import com.akshit.auth.exception.ApiException;
 import com.akshit.auth.model.GithubAccessTokenRequestResponse;
 import com.akshit.auth.model.GithubGetUserRequestResponse;
 import com.akshit.auth.model.Token;
+import com.akshit.auth.service.CookiesService;
 import com.akshit.auth.service.JwtService;
 import com.akshit.auth.service.UserService;
-import com.akshit.auth.utils.Cookies;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +41,9 @@ public class GithubOAuth2Service {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CookiesService cookiesService;
+
     public ResponseEntity<Void> authorizationEndpointHandler(HttpServletRequest request){
         String referer = request.getHeader(HttpHeaders.REFERER);
         String state = generateState(referer);
@@ -71,7 +74,7 @@ public class GithubOAuth2Service {
             HttpServletRequest request
     )
     {
-        String stateCookie = Cookies.readServletCookie(request, "state");
+        String stateCookie = cookiesService.readServletCookie(request, "state");
         if(stateCookie == null || !stateCookie.equals(state))
             throw new ApiException("Malformed state", HttpStatus.BAD_REQUEST);
 
@@ -104,8 +107,8 @@ public class GithubOAuth2Service {
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, (!referer.equals("")) ? referer : "http://localhost:8080")
-                .header(HttpHeaders.SET_COOKIE, Cookies.getAccessTokenCookie(accessToken.getValue()).toString())
-                .header(HttpHeaders.SET_COOKIE, Cookies.getRefreshTokenCookie(refreshToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookiesService.getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookiesService.getRefreshTokenCookie(refreshToken.getValue()).toString())
                 .header(HttpHeaders.SET_COOKIE, removeStateCookie.toString())
                 .build();
     }

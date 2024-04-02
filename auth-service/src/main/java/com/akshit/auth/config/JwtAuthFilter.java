@@ -1,9 +1,9 @@
 package com.akshit.auth.config;
 
 import com.akshit.auth.entity.UserEntity;
+import com.akshit.auth.service.CookiesService;
 import com.akshit.auth.service.JwtService;
 import com.akshit.auth.service.UserService;
-import com.akshit.auth.utils.Cookies;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -36,6 +36,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
 
+    @Autowired
+    private CookiesService cookiesService;
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -44,7 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     )
     {
         try {
-            String accessToken = Cookies.readServletCookie(request, "access_token");
+            String accessToken = cookiesService.readServletCookie(request, "access_token");
             if(accessToken == null){
                 filterChain.doFilter(request, response);
                 return;

@@ -5,7 +5,6 @@ import com.akshit.auth.entity.UserEntity;
 import com.akshit.auth.exception.ApiException;
 import com.akshit.auth.model.*;
 import com.akshit.auth.repo.UserRepository;
-import com.akshit.auth.utils.Cookies;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,9 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.akshit.auth.utils.Cookies.getAccessTokenCookie;
-import static com.akshit.auth.utils.Cookies.getRefreshTokenCookie;
-
 @Service
 public class UserService implements UserDetailsService {
 
@@ -42,6 +38,9 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private CookiesService cookiesService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -64,7 +63,7 @@ public class UserService implements UserDetailsService {
     }
 
     public UserResponse getLoggedInUserDetails(HttpServletRequest request, UserEntity user){
-        String accessTokenValue = Cookies.readServletCookie(request, "access_token");
+        String accessTokenValue = cookiesService.readServletCookie(request, "access_token");
         return UserResponse
                 .builderFromEntity(user)
                 .accessTokenExpireAtMillis(jwtService.extractExpiration(accessTokenValue).getTime())
@@ -96,8 +95,8 @@ public class UserService implements UserDetailsService {
 
         return ResponseEntity
                 .ok()
-                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
-                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookiesService.getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookiesService.getRefreshTokenCookie(refreshToken.getValue()).toString())
                 .body(UserResponse.fromEntityAndAccessToken(user, accessToken));
     }
 
@@ -113,8 +112,8 @@ public class UserService implements UserDetailsService {
 
         return ResponseEntity
                 .ok()
-                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
-                .header(HttpHeaders.SET_COOKIE, getRefreshTokenCookie(refreshToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookiesService.getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookiesService.getRefreshTokenCookie(refreshToken.getValue()).toString())
                 .body(UserResponse.fromEntityAndAccessToken(user, accessToken));
     }
 

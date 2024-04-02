@@ -27,3 +27,5 @@ oauth2:
       client-id: 863da1c4cee91b2ee043
       client-secret: 96ae3344a40941d5c35281f271c496863ab8239c
       redirect-uri: https://localhost:8080/login/oauth2/github/callback
+cookie:
+  domain: localhost

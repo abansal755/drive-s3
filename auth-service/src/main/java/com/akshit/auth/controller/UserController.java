@@ -5,7 +5,6 @@ import com.akshit.auth.entity.UserEntity;
 import com.akshit.auth.model.*;
 import com.akshit.auth.service.JwtService;
 import com.akshit.auth.service.UserService;
-import com.akshit.auth.utils.Cookies;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +22,6 @@ import java.util.List;
 
 import static com.akshit.auth.config.AppConfig.ACCESS_EXPIRE_AFTER_MILLIS;
 import static com.akshit.auth.config.AppConfig.REFRESH_EXPIRE_AFTER_MILLIS;
-import static com.akshit.auth.utils.Cookies.getAccessTokenCookie;
-import static com.akshit.auth.utils.Cookies.getRefreshTokenCookie;
 
 @RestController
 @RequestMapping("/api/v1/users")

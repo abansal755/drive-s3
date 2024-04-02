@@ -4,15 +4,12 @@ import com.akshit.auth.entity.UserEntity;
 import com.akshit.auth.exception.ApiException;
 import com.akshit.auth.model.AccessTokenSummary;
 import com.akshit.auth.model.Token;
-import com.akshit.auth.utils.Cookies;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import static com.akshit.auth.utils.Cookies.getAccessTokenCookie;
 
 @Service
 public class TokenService {
@@ -23,8 +20,11 @@ public class TokenService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CookiesService cookiesService;
+
     public ResponseEntity<AccessTokenSummary> getNewAccessToken(HttpServletRequest request) {
-        String refreshToken = Cookies.readServletCookie(request, "refresh_token");
+        String refreshToken = cookiesService.readServletCookie(request, "refresh_token");
         String email = jwtService.extractEmail(refreshToken);
         if(email == null || jwtService.isTokenExpired(refreshToken))
             throw new ApiException("Invalid refresh token", HttpStatus.BAD_REQUEST);
@@ -33,7 +33,7 @@ public class TokenService {
         Token accessToken = jwtService.generateAccessToken(user);
         return ResponseEntity
                 .ok()
-                .header(HttpHeaders.SET_COOKIE, getAccessTokenCookie(accessToken.getValue()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookiesService.getAccessTokenCookie(accessToken.getValue()).toString())
                 .body(AccessTokenSummary.fromAccessToken(accessToken));
     }
 }

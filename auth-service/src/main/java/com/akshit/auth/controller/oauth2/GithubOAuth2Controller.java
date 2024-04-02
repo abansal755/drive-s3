@@ -7,7 +7,6 @@ import com.akshit.auth.model.Token;
 import com.akshit.auth.service.JwtService;
 import com.akshit.auth.service.UserService;
 import com.akshit.auth.service.oauth2.GithubOAuth2Service;
-import com.akshit.auth.utils.Cookies;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;

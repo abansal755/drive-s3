@@ -26,3 +26,5 @@ spring:
       request-timeout: -1
 s3:
   bucket-name: akshit-drive-demo
+cors:
+  allowed-origins: https://localhost:5173

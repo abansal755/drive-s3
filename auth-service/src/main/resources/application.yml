@@ -29,3 +29,5 @@ oauth2:
       redirect-uri: https://localhost:8080/login/oauth2/github/callback
 cookie:
   domain: localhost
+cors:
+  allowed-origins: https://localhost:5173

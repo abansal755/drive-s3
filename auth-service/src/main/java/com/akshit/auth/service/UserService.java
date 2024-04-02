@@ -118,16 +118,8 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<Void> logoutUser(){
-        ResponseCookie removeAccessTokenCookie = ResponseCookie
-                .from("access_token", "")
-                .path("/")
-                .maxAge(0)
-                .build();
-        ResponseCookie removeRefreshTokenCookie = ResponseCookie
-                .from("refresh_token", "")
-                .path("/")
-                .maxAge(0)
-                .build();
+        ResponseCookie removeAccessTokenCookie = cookiesService.getLogoutAccessTokenCookie();
+        ResponseCookie removeRefreshTokenCookie = cookiesService.getLogoutRefreshTokenCookie();
 
         return ResponseEntity
                 .ok()

@@ -35,6 +35,14 @@ public class CookiesService {
         return getBuilder("refresh_token", token, (long)REFRESH_EXPIRE_AFTER_MILLIS/1000).build();
     }
 
+    public ResponseCookie getLogoutAccessTokenCookie(){
+        return getBuilder("access_token", "", 0L).build();
+    }
+
+    public ResponseCookie getLogoutRefreshTokenCookie(){
+        return getBuilder("refresh_token", "", 0L).build();
+    }
+
     private ResponseCookie.ResponseCookieBuilder getBuilder(String key, String value, Long maxAge){
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie
                 .from(key, value)

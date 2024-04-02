@@ -9,16 +9,16 @@ server:
     key-alias: localhost
 auth-service:
   uri: https://localhost:8080
-  admin-access-token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGktc2VydmljZSIsImlhdCI6MTcxMDg2MTU2MCwiZXhwIjoyMDI2MjIxNTYwfQ.aC4sn7SCTkEqmLt6aty8o6JqYjs5LerNhr7L-80WE7A
+  admin-access-token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGktc2VydmljZSIsImlhdCI6MTcxMjA0MTA5MywiZXhwIjoyMDI3NDAxMDkzfQ.yCXvyPxaK5H6CeiomnAhIWjxMNod2gPoTtWjw5EWWaM
 spring:
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
   datasource:
-    url: jdbc:mysql://localhost:3306/drive-s3
-    username: root
-    password: root
+    url: jdbc:mysql://drive.c3mmcam24n9f.ap-south-1.rds.amazonaws.com/drive
+    username: admin
+    password: SJpkiYVCZzbzlP2GEUmA
   main:
     allow-circular-references: true
   mvc:

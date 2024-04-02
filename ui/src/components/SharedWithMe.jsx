@@ -93,7 +93,10 @@ const SharedWithMe = () => {
 				>
 					{isSuccess &&
 						permissions.map((permission) => (
-							<ResourceItem permission={permission} />
+							<ResourceItem
+								permission={permission}
+								key={permission.id}
+							/>
 						))}
 				</Wrap>
 			</VStack>

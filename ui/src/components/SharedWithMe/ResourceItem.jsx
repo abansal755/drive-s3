@@ -6,7 +6,7 @@ import { Link as ReactRouterLink } from "react-router-dom";
 
 const ResourceItem = ({ permission }) => {
 	return (
-		<WrapItem w="160px" h="160px" key={permission.id}>
+		<WrapItem w="160px" h="160px">
 			<VStack w="100%" h="100%" overflow="hidden">
 				{permission.resourceType === "FILE" && (
 					<Fragment>

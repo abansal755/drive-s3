@@ -9,7 +9,7 @@ import {
 	ModalHeader,
 	ModalOverlay,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import useDownloadFile from "../../../../../hooks/useDownloadFile";
 import { useTheme } from "@emotion/react";
 import Loading from "../../../../common/Loading";
@@ -17,29 +17,43 @@ import Loading from "../../../../common/Loading";
 const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 	const { initiateDownloadMutation, status, abortMutation } =
 		useDownloadFile(file);
-	const [contents, setContents] = useState("");
+	const blobParts = useRef([]);
 	const theme = useTheme();
 
 	useEffect(() => {
-		if (!isViewerOpen) return;
+		if (!isViewerOpen) {
+			blobParts.current = [];
+			return;
+		}
 		(async () => {
 			try {
 				const { readable, writable } = new TransformStream();
 				const reader = readable.getReader();
 				initiateDownloadMutation.mutate(writable);
-				let contents = new Uint8Array(0);
 				while (true) {
 					const { value, done } = await reader.read();
 					if (done) break;
-					contents = new Uint8Array([...contents, ...value]);
+					blobParts.current.push(value);
 				}
-				const textDecoder = new TextDecoder();
-				setContents(textDecoder.decode(contents));
 			} catch (err) {
 				console.error(err);
 			}
 		})();
 	}, [isViewerOpen]);
+
+	const getTextFromBlobParts = (blobParts) => {
+		const uint8arr = [];
+		blobParts.forEach((blobPart) => {
+			blobPart.forEach((uint8) => uint8arr.push(uint8));
+		});
+		const textDecoder = new TextDecoder();
+		return textDecoder.decode(new Uint8Array(uint8arr));
+	};
+
+	const decodedText = useMemo(() => {
+		if (status === "DOWNLOADED")
+			return getTextFromBlobParts(blobParts.current);
+	}, [status]);
 
 	const closeBtnClickHandler = () => {
 		if (status === "DOWNLOADING") abortMutation.mutate();
@@ -74,7 +88,7 @@ const TextViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 							w="fit-content"
 							minW="100%"
 						>
-							<pre>{contents}</pre>
+							<pre>{decodedText}</pre>
 						</Box>
 					)}
 				</ModalBody>

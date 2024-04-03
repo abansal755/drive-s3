@@ -9,7 +9,7 @@ import {
 	ModalHeader,
 	ModalOverlay,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import useDownloadFile from "../../../../../hooks/useDownloadFile";
 import ReactPanZoom from "react-image-pan-zoom-rotate";
 import { useTheme } from "@emotion/react";
@@ -17,10 +17,13 @@ import { useTheme } from "@emotion/react";
 const ImageViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 	const { initiateDownloadMutation, status, abortMutation } =
 		useDownloadFile(file);
-	const [contents, setContents] = useState([]);
+	const blobParts = useRef([]);
 
 	useEffect(() => {
-		if (!isViewerOpen) return;
+		if (!isViewerOpen) {
+			blobParts.current = [];
+			return;
+		}
 		(async () => {
 			try {
 				const { readable, writable } = new TransformStream();
@@ -29,7 +32,7 @@ const ImageViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 				while (true) {
 					const { value, done } = await reader.read();
 					if (done) break;
-					setContents((prev) => [...prev, value]);
+					blobParts.current.push(value);
 				}
 			} catch (err) {
 				console.error(err);
@@ -39,17 +42,11 @@ const ImageViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 
 	const closeBtnClickHandler = () => {
 		if (status === "DOWNLOADING") abortMutation.mutate();
-		else if (status === "DOWNLOADED") {
-			onViewerClose();
-			setContents([]);
-		}
+		else if (status === "DOWNLOADED") onViewerClose();
 	};
 
 	useEffect(() => {
-		if (status === "ABORTED") {
-			onViewerClose();
-			setContents([]);
-		}
+		if (status === "ABORTED") onViewerClose();
 	}, [status]);
 
 	const theme = useTheme();
@@ -74,9 +71,11 @@ const ImageViewer = ({ file, isViewerOpen, onViewerOpen, onViewerClose }) => {
 						bgColor={theme.colors.gray[800]}
 						position="relative"
 					>
-						{contents && contents.length > 0 && (
+						{blobParts.current && blobParts.current.length > 0 && (
 							<ReactPanZoom
-								image={URL.createObjectURL(new Blob(contents))}
+								image={URL.createObjectURL(
+									new Blob(blobParts.current),
+								)}
 							/>
 						)}
 					</Box>

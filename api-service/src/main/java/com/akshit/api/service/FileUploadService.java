@@ -32,9 +32,6 @@ public class FileUploadService {
     @Autowired
     private FileRepository fileRepository;
 
-    @Autowired
-    private S3Client s3Client;
-
     @Value("${s3.bucket-name}")
     private String S3_BUCKET_NAME;
 
@@ -46,22 +43,7 @@ public class FileUploadService {
 
     private void uploadFileFromInputStream(FileEntity file, Long fileUploadId, InputStream inputStream, long contentLength){
         String fileName = file.getId().toString();
-        Thread thread = new Thread(() -> {
-            try {
-                while(true){
-                    entityManager.clear();
-                    UploadStatus status = fileUploadRepository.findFileUploadEntityById(fileUploadId).getUploadStatus();
-                    if(status == UploadStatus.ABORTED){
-                        inputStream.close();
-                        break;
-                    }
-                    Thread.sleep(3_000);
-                }
-            }
-            catch (Exception ex){
-                System.err.println(ex);
-            }
-        });
+        Thread thread = new StreamCloserOnAbortThread(fileUploadRepository, entityManager, inputStream, fileUploadId);
         thread.start();
         try {
             s3Service.putS3Object(fileName, inputStream, contentLength);

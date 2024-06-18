@@ -1,0 +1,4 @@
+server:
+  ssl:
+    certificate: ${API_SERVICE_CERT}
+    certificate-private-key: ${API_SERVICE_CERT_PRIVATE_KEY}

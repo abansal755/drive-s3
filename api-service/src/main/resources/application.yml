@@ -1,30 +1,24 @@
 server:
-  port: 8081
   http2:
     enabled: true
-  ssl:
-    key-store-type: PKCS12
-    key-store: C:\Users\Akshit\Documents\Java\drive-s3\certs\localhost.p12
-    key-store-password: changeit
-    key-alias: localhost
 auth-service:
-  uri: https://localhost:8080
-  admin-access-token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGktc2VydmljZSIsImlhdCI6MTcxMjA0MTA5MywiZXhwIjoyMDI3NDAxMDkzfQ.yCXvyPxaK5H6CeiomnAhIWjxMNod2gPoTtWjw5EWWaM
+  uri: ${AUTH_SERVICE_URI:https://localhost:8080}
+  admin-access-token: ${AUTH_SERVICE_ADMIN_ACCESS_TOKEN:eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGktc2VydmljZSIsImlhdCI6MTcxMjA0MTA5MywiZXhwIjoyMDI3NDAxMDkzfQ.yCXvyPxaK5H6CeiomnAhIWjxMNod2gPoTtWjw5EWWaM}
 spring:
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
   datasource:
-    url: jdbc:mysql://drive.c3mmcam24n9f.ap-south-1.rds.amazonaws.com/drive
-    username: admin
-    password: SJpkiYVCZzbzlP2GEUmA
+    url: ${API_SERVICE_DB_URL:jdbc:mysql://drive.c3mmcam24n9f.ap-south-1.rds.amazonaws.com/drive}
+    username: ${API_SERVICE_DB_USERNAME:admin}
+    password: ${API_SERVICE_DB_PASSWORD:SJpkiYVCZzbzlP2GEUmA}
   main:
     allow-circular-references: true
   mvc:
     async:
       request-timeout: -1
 s3:
-  bucket-name: akshit-drive-demo
+  bucket-name: ${API_SERVICE_S3_BUCKET_NAME:akshit-drive-demo}
 cors:
-  allowed-origins: https://localhost:5173
+  allowed-origins: ${API_SERVICE_CORS_ALLOWED_ORIGINS:https://localhost:5173}

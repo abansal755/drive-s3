@@ -1,0 +1,4 @@
+server:
+  ssl:
+    certificate: ${AUTH_SERVICE_CERT}
+    certificate-private-key: ${AUTH_SERVICE_CERT_PRIVATE_KEY}

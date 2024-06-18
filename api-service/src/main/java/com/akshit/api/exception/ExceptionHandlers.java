@@ -38,7 +38,9 @@ public class ExceptionHandlers {
     @ExceptionHandler
     public ResponseEntity<ExceptionResponse> apiException(ApiException exception){
         System.err.println(getExceptionString(exception));
-        getExceptionStackStrace(exception).forEach(System.err::println);
+        List<String> stackTrace = getExceptionStackStrace(exception);
+        if(stackTrace != null)
+            stackTrace.forEach(System.err::println);
         String message = "Something went wrong";
         if(exception.getMessage() != null)
             message = exception.getMessage();
@@ -53,7 +55,7 @@ public class ExceptionHandlers {
                         .status(status)
                         .message(message)
                         .exception(getExceptionString(exception))
-                        .stackTrace(getExceptionStackStrace(exception))
+                        .stackTrace(stackTrace)
                         .build());
     }
 
@@ -61,13 +63,15 @@ public class ExceptionHandlers {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ExceptionResponse authenticationException(AuthenticationException authException){
         System.err.println(getExceptionString(authException));
-        getExceptionStackStrace(authException).forEach(System.err::println);
+        List<String> stackTrace = getExceptionStackStrace(authException);
+        if(stackTrace != null)
+            stackTrace.forEach(System.err::println);
         return ExceptionResponse
                 .builder()
                 .status(HttpStatus.UNAUTHORIZED)
                 .message("Unable to authenticate")
                 .exception(getExceptionString(authException))
-                .stackTrace(getExceptionStackStrace(authException))
+                .stackTrace(stackTrace)
                 .build();
     }
 
@@ -75,7 +79,9 @@ public class ExceptionHandlers {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionResponse methodArgumentNotValidException(MethodArgumentNotValidException exception){
         System.err.println(getExceptionString(exception));
-        getExceptionStackStrace(exception).forEach(System.err::println);
+        List<String> stackTrace = getExceptionStackStrace(exception);
+        if(stackTrace != null)
+            stackTrace.forEach(System.err::println);
         return ExceptionResponse
                 .builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -86,7 +92,7 @@ public class ExceptionHandlers {
                                 .findFirst()
                                 .orElse(exception.getMessage()))
                 .exception(getExceptionString(exception))
-                .stackTrace(getExceptionStackStrace(exception))
+                .stackTrace(stackTrace)
                 .build();
     }
 
@@ -94,13 +100,15 @@ public class ExceptionHandlers {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionResponse exception(Exception exception){
         System.err.println(getExceptionString(exception));
-        getExceptionStackStrace(exception).forEach(System.err::println);
+        List<String> stackTrace = getExceptionStackStrace(exception);
+        if(stackTrace != null)
+            stackTrace.forEach(System.err::println);
         return ExceptionResponse
                 .builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Something went wrong")
                 .exception(getExceptionString(exception))
-                .stackTrace(getExceptionStackStrace(exception))
+                .stackTrace(stackTrace)
                 .build();
     }
 }

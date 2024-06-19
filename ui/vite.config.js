@@ -11,14 +11,15 @@ export default defineConfig({
 			include: ["path"],
 		}),
 	],
-	server: {
-		https: {
-			key: fs.readFileSync(
-				"C:\\Users\\Akshit\\Documents\\Java\\drive-s3\\certs\\localhost.key",
-			),
-			cert: fs.readFileSync(
-				"C:\\Users\\Akshit\\Documents\\Java\\drive-s3\\certs\\localhost.crt",
-			),
-		},
-	},
+	// https for local dev
+	// server: {
+	// 	https: {
+	// 		key: fs.readFileSync(
+	// 			"C:\\Users\\Akshit\\Documents\\Java\\drive-s3\\certs\\localhost.key",
+	// 		),
+	// 		cert: fs.readFileSync(
+	// 			"C:\\Users\\Akshit\\Documents\\Java\\drive-s3\\certs\\localhost.crt",
+	// 		),
+	// 	},
+	// },
 });

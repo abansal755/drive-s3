@@ -1,29 +1,23 @@
 package com.akshit.api.service;
 
+import com.akshit.api.SharedResources;
 import com.akshit.api.entity.*;
 import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.*;
 import com.akshit.api.model.File;
 import com.akshit.api.repo.FileRepository;
-import com.akshit.api.repo.FileUploadRepository;
 import com.akshit.api.repo.FolderRepository;
 import com.akshit.api.repo.PermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import software.amazon.awssdk.services.s3.S3Client;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -31,9 +25,6 @@ public class FileService {
 
     @Autowired
     private FileRepository fileRepository;
-
-    @Autowired
-    private FileUploadRepository fileUploadRepository;
 
     @Autowired
     private FolderRepository folderRepository;
@@ -49,6 +40,9 @@ public class FileService {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private SharedResources sharedResources;
 
     @Transactional(propagation = Propagation.MANDATORY)
     public PermissionType getFilePermissionForUser(FileEntity file, User user){
@@ -104,12 +98,14 @@ public class FileService {
                         .createdAt(new Date().getTime())
                         .build());
 
-        FileUploadEntity fileUploadEntity = fileUploadRepository.save(FileUploadEntity
+        FileUploadEntity fileUploadEntity = FileUploadEntity
                         .builder()
+                        .id(UUID.randomUUID().toString())
                         .userId(user.getId())
                         .fileId(file.getId())
                         .uploadStatus(UploadStatus.NOT_STARTED)
-                        .build());
+                        .build();
+        sharedResources.fileUploads.put(fileUploadEntity.getId(), fileUploadEntity);
         return FileCreateResponse
                         .builder()
                         .uploadId(fileUploadEntity.getId())

@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @Builder
 public class DownloadInitiateResponse {
-    private Long downloadId;
+    private String downloadId;
 }

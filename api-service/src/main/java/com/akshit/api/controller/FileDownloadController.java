@@ -21,12 +21,12 @@ public class FileDownloadController {
     }
 
     @GetMapping("stream/{downloadId}")
-    public StreamingResponseBody download(@PathVariable Long downloadId, @AuthenticationPrincipal User user){
+    public StreamingResponseBody download(@PathVariable String downloadId, @AuthenticationPrincipal User user){
         return fileDownloadService.download(downloadId, user);
     }
 
     @PatchMapping("abort/{downloadId}")
-    public void abort(@PathVariable Long downloadId, @AuthenticationPrincipal User user){
+    public void abort(@PathVariable String downloadId, @AuthenticationPrincipal User user){
         fileDownloadService.abort(downloadId, user);
     }
 }

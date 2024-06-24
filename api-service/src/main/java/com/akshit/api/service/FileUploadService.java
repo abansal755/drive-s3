@@ -1,33 +1,24 @@
 package com.akshit.api.service;
 
-import com.akshit.api.entity.DownloadStatus;
+import com.akshit.api.SharedResources;
+import com.akshit.api.StreamCloserOnAbortThread;
 import com.akshit.api.entity.FileEntity;
 import com.akshit.api.entity.FileUploadEntity;
 import com.akshit.api.entity.UploadStatus;
 import com.akshit.api.exception.ApiException;
-import com.akshit.api.model.UploadStatusResponse;
 import com.akshit.api.model.User;
 import com.akshit.api.repo.FileRepository;
-import com.akshit.api.repo.FileUploadRepository;
-import jakarta.annotation.PostConstruct;
-import jakarta.persistence.EntityManager;
-import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.*;
 
 @Service
 public class FileUploadService {
-
-    @Autowired
-    private FileUploadRepository fileUploadRepository;
 
     @Autowired
     private FileRepository fileRepository;
@@ -39,18 +30,20 @@ public class FileUploadService {
     private S3Service s3Service;
 
     @Autowired
-    private EntityManager entityManager;
+    private SharedResources sharedResources;
 
-    private void uploadFileFromInputStream(FileEntity file, Long fileUploadId, InputStream inputStream, long contentLength){
+    private void uploadFileFromInputStream(FileEntity file, FileUploadEntity fileUploadEntity, InputStream inputStream, long contentLength) throws InterruptedException {
         String fileName = file.getId().toString();
-        Thread thread = new StreamCloserOnAbortThread(fileUploadRepository, entityManager, inputStream, fileUploadId);
+        Thread thread = new StreamCloserOnAbortThread(fileUploadEntity, inputStream);
         thread.start();
         try {
             s3Service.putS3Object(fileName, inputStream, contentLength);
         }
         finally {
-            thread.interrupt();
+            if(fileUploadEntity.getUploadStatus() != UploadStatus.ABORTED)
+                thread.interrupt();
         }
+        thread.join();
     }
 
     public void fileUploadExistenceRequiredValidation(FileUploadEntity fileUpload){
@@ -63,9 +56,9 @@ public class FileUploadService {
             throw new ApiException("User doesn't have access to this upload ID", HttpStatus.FORBIDDEN);
     }
 
-    public void upload(HttpServletRequest request, Long uploadId, User user) throws IOException {
+    public void upload(HttpServletRequest request, String uploadId, User user) throws IOException, InterruptedException {
         // validations
-        FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
+        FileUploadEntity fileUpload = sharedResources.fileUploads.get(uploadId);
         fileUploadExistenceRequiredValidation(fileUpload);
         fileUploadMatchUserValidation(fileUpload, user);
 
@@ -74,18 +67,16 @@ public class FileUploadService {
 
         // set status to uploading
         fileUpload.setUploadStatus(UploadStatus.UPLOADING);
-        fileUploadRepository.save(fileUpload);
 
         // upload
         FileEntity file = fileRepository.findFileEntityById(fileUpload.getFileId());
         String fileName = file.getId().toString();
         long contentLength = Long.parseLong(request.getHeader("x-content-length"));
         BufferedInputStream inputStream = new BufferedInputStream(request.getInputStream());
-        uploadFileFromInputStream(file, fileUpload.getId(), inputStream, contentLength);
+        uploadFileFromInputStream(file, fileUpload, inputStream, contentLength);
 
-        // update status to uploaded
-        fileUpload.setUploadStatus(UploadStatus.UPLOADED);
-        fileUploadRepository.save(fileUpload);
+        // remove from fileUploads
+        sharedResources.fileUploads.remove(uploadId);
 
         // update file's s3 info
         Long size = s3Service.getS3ObjectSize(fileName);
@@ -96,8 +87,8 @@ public class FileUploadService {
     }
 
     @Transactional
-    public void abort(Long uploadId, User user){
-        FileUploadEntity fileUpload = fileUploadRepository.findFileUploadEntityById(uploadId);
+    public void abort(String uploadId, User user){
+        FileUploadEntity fileUpload = sharedResources.fileUploads.get(uploadId);
         fileUploadExistenceRequiredValidation(fileUpload);
         fileUploadMatchUserValidation(fileUpload, user);
 
@@ -110,7 +101,6 @@ public class FileUploadService {
             throw new ApiException("Upload has already been aborted", HttpStatus.BAD_REQUEST);
 
         fileUpload.setUploadStatus(UploadStatus.ABORTED);
-        fileUploadRepository.save(fileUpload);
         fileRepository.deleteById(fileUpload.getFileId());
     }
 }

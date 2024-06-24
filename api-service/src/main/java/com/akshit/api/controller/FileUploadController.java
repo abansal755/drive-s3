@@ -24,14 +24,13 @@ public class FileUploadController {
     @PutMapping("stream/{uploadId}")
     public void upload(
             HttpServletRequest request,
-            @PathVariable Long uploadId,
-            @AuthenticationPrincipal User user) throws IOException
-    {
+            @PathVariable String uploadId,
+            @AuthenticationPrincipal User user) throws IOException, InterruptedException {
         fileUploadService.upload(request, uploadId, user);
     }
 
     @PatchMapping("abort/{uploadId}")
-    public void abort(@PathVariable Long uploadId, @AuthenticationPrincipal User user){
+    public void abort(@PathVariable String uploadId, @AuthenticationPrincipal User user){
         fileUploadService.abort(uploadId, user);
     }
 }

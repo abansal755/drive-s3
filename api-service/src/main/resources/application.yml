@@ -3,22 +3,21 @@ server:
     enabled: true
 auth-service:
   uri: ${AUTH_SERVICE_URI:https://localhost:8080}
-  admin-access-token: ${AUTH_SERVICE_ADMIN_ACCESS_TOKEN:eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGktc2VydmljZSIsImlhdCI6MTcxMjA0MTA5MywiZXhwIjoyMDI3NDAxMDkzfQ.yCXvyPxaK5H6CeiomnAhIWjxMNod2gPoTtWjw5EWWaM}
+  admin-access-token: ${AUTH_SERVICE_ADMIN_ACCESS_TOKEN:eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkcml2ZS1hcGkiLCJpYXQiOjE3MjMzMTExMTksImV4cCI6MjAzODY3MTExOX0.izH-Gh0I9yVb68MvZe5Jiak_V1LkgZFBcXuTVS5rWQo}
 spring:
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
   datasource:
-    url: ${API_SERVICE_DB_URL:jdbc:mysql://drive.c3mmcam24n9f.ap-south-1.rds.amazonaws.com/drive}
-    username: ${API_SERVICE_DB_USERNAME:admin}
-    password: ${API_SERVICE_DB_PASSWORD:SJpkiYVCZzbzlP2GEUmA}
+    url: ${API_SERVICE_DB_URL:jdbc:mysql://localhost/drive}
+    username: ${API_SERVICE_DB_USERNAME:root}
+    password: ${API_SERVICE_DB_PASSWORD:root}
   main:
     allow-circular-references: true
   mvc:
     async:
       request-timeout: -1
-s3:
-  bucket-name: ${API_SERVICE_S3_BUCKET_NAME:akshit-drive-demo}
+files-dir: ${API_SERVICE_FILES_DIR:"C:\\Users\\akshi\\Documents\\Drive-Files"}
 cors:
   allowed-origins: ${API_SERVICE_CORS_ALLOWED_ORIGINS:https://localhost:5173}

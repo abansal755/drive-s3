@@ -21,11 +21,11 @@ import java.util.concurrent.Executors;
 @Configuration
 public class AppConfig {
 
-    @Bean
-    public S3Client s3Client() {
-        return S3Client
-                .builder()
-                .region(Region.AP_SOUTH_1)
-                .build();
-    }
+//    @Bean
+//    public S3Client s3Client() {
+//        return S3Client
+//                .builder()
+//                .region(Region.AP_SOUTH_1)
+//                .build();
+//    }
 }

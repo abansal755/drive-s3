@@ -9,7 +9,6 @@ import com.akshit.api.exception.ApiException;
 import com.akshit.api.model.DownloadInitiateResponse;
 import com.akshit.api.model.User;
 import com.akshit.api.repo.FileRepository;
-import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,11 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
-import java.util.Date;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class FileDownloadService {
@@ -36,7 +31,7 @@ public class FileDownloadService {
     private FileService fileService;
 
     @Autowired
-    private S3Service s3Service;
+    private FileHandlingService fileHandlingService;
 
     @Autowired
     private SharedResources sharedResources;
@@ -87,7 +82,7 @@ public class FileDownloadService {
 
         return (OutputStream outputStream) -> {
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-            BufferedInputStream inputStream = s3Service.getS3Object(fileName);
+            BufferedInputStream inputStream = fileHandlingService.getObject(fileName);
 
             while(true){
                 if(fileDownload.getStatus() == DownloadStatus.ABORTED)

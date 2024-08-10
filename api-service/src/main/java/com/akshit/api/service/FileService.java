@@ -36,7 +36,7 @@ public class FileService {
     private PermissionRepository permissionRepository;
 
     @Autowired
-    private S3Service s3Service;
+    private FileHandlingService fileHandlingService;
 
     @Autowired
     private AuthService authService;
@@ -57,7 +57,7 @@ public class FileService {
     public void deleteFile(Long fileId){
         fileRepository.deleteById(fileId);
         permissionRepository.deleteAllByResourceIdAndResourceType(fileId, ResourceType.FILE);
-        s3Service.deleteS3Object(fileId.toString());
+        fileHandlingService.deleteObject(fileId.toString());
     }
 
     @Transactional(propagation = Propagation.MANDATORY)

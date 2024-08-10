@@ -14,16 +14,17 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 
-@Service
-public class S3Service {
+//@Service
+public class S3Service implements FileHandlingService {
 
-    @Autowired
+//    @Autowired
     private S3Client s3Client;
 
-    @Value("${s3.bucket-name}")
+//    @Value("${s3.bucket-name}")
     private String S3_BUCKET_NAME;
 
-    public void putS3Object(String s3ObjectKey, InputStream inputStream, long contentLength){
+    @Override
+    public void putObject(String s3ObjectKey, InputStream inputStream, long contentLength){
         PutObjectRequest putObjectRequest = PutObjectRequest
                 .builder()
                 .bucket(S3_BUCKET_NAME)
@@ -32,7 +33,8 @@ public class S3Service {
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
     }
 
-    public BufferedInputStream getS3Object(String s3ObjectKey){
+    @Override
+    public BufferedInputStream getObject(String s3ObjectKey){
         GetObjectRequest getObjectRequest = GetObjectRequest
                 .builder()
                 .bucket(S3_BUCKET_NAME)
@@ -42,7 +44,8 @@ public class S3Service {
         return new BufferedInputStream(inputStream);
     }
 
-    public void deleteS3Object(String s3ObjectKey){
+    @Override
+    public void deleteObject(String s3ObjectKey){
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest
                 .builder()
                 .bucket(S3_BUCKET_NAME)
@@ -51,7 +54,8 @@ public class S3Service {
         s3Client.deleteObject(deleteObjectRequest);
     }
 
-    public Long getS3ObjectSize(String s3ObjectKey){
+    @Override
+    public Long getObjectSize(String s3ObjectKey){
         GetObjectAttributesRequest request = GetObjectAttributesRequest
                 .builder()
                 .bucket(S3_BUCKET_NAME)

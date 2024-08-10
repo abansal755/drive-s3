@@ -23,11 +23,11 @@ public class FileUploadService {
     @Autowired
     private FileRepository fileRepository;
 
-    @Value("${s3.bucket-name}")
-    private String S3_BUCKET_NAME;
+//    @Value("${s3.bucket-name}")
+    private String S3_BUCKET_NAME = null;
 
     @Autowired
-    private S3Service s3Service;
+    private FileHandlingService fileHandlingService;
 
     @Autowired
     private SharedResources sharedResources;
@@ -37,7 +37,7 @@ public class FileUploadService {
         Thread thread = new StreamCloserOnAbortThread(fileUploadEntity, inputStream);
         thread.start();
         try {
-            s3Service.putS3Object(fileName, inputStream, contentLength);
+            fileHandlingService.putObject(fileName, inputStream, contentLength);
         }
         finally {
             if(fileUploadEntity.getUploadStatus() != UploadStatus.ABORTED)
@@ -79,7 +79,7 @@ public class FileUploadService {
         sharedResources.fileUploads.remove(uploadId);
 
         // update file's s3 info
-        Long size = s3Service.getS3ObjectSize(fileName);
+        Long size = fileHandlingService.getObjectSize(fileName);
         file.setS3BucketName(S3_BUCKET_NAME);
         file.setS3ObjectKey(fileName);
         file.setSizeInBytes(size);

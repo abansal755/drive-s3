@@ -99,13 +99,11 @@ public class FileService {
                         .createdAt(new Date().getTime())
                         .build());
 
-        FileUploadEntity fileUploadEntity = FileUploadEntity
-                        .builder()
-                        .id(UUID.randomUUID().toString())
-                        .userId(user.getId())
-                        .fileId(file.getId())
-                        .uploadStatus(new AtomicReference<>(UploadStatus.NOT_STARTED))
-                        .build();
+        FileUploadEntity fileUploadEntity = new FileUploadEntity(
+                UUID.randomUUID().toString(),
+                file.getId(),
+                user.getId(),
+                new AtomicReference<>(UploadStatus.NOT_STARTED));
         sharedResources.fileUploads.put(fileUploadEntity.getId(), fileUploadEntity);
         return FileCreateResponse
                         .builder()

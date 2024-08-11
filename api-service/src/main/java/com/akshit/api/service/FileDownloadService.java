@@ -20,6 +20,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class FileDownloadService {
@@ -54,13 +55,12 @@ public class FileDownloadService {
         PermissionType permission = fileService.getFilePermissionForUser(file, user);
         fileService.fileReadPermissionRequiredValidation(permission);
 
-        FileDownloadEntity fileDownload = FileDownloadEntity
-                .builder()
-                .id(UUID.randomUUID().toString())
-                .userId(user.getId())
-                .fileId(fileId)
-                .status(DownloadStatus.NOT_STARTED)
-                .build();
+        FileDownloadEntity fileDownload = new FileDownloadEntity(
+                UUID.randomUUID().toString(),
+                user.getId(),
+                fileId,
+                new AtomicReference<>(DownloadStatus.NOT_STARTED)
+        );
         sharedResources.fileDownloads.put(fileDownload.getId(), fileDownload);
         return DownloadInitiateResponse
                 .builder()
@@ -78,14 +78,14 @@ public class FileDownloadService {
         fileService.fileExistenceRequiredValidation(file);
 
         String fileName = file.getId().toString();
-        fileDownload.setStatus(DownloadStatus.DOWNLOADING);
+        fileDownload.getStatus().set(DownloadStatus.DOWNLOADING);
 
         return (OutputStream outputStream) -> {
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
             BufferedInputStream inputStream = fileHandlingService.getObject(fileName);
 
             while(true){
-                if(fileDownload.getStatus() == DownloadStatus.ABORTED)
+                if(fileDownload.getStatus().get() == DownloadStatus.ABORTED)
                     break;
                 int b = inputStream.read();
                 if(b == -1)
@@ -105,14 +105,8 @@ public class FileDownloadService {
         fileDownloadExistenceRequiredValidation(fileDownload);
         fileDownloadUserValidation(fileDownload, user);
 
-        DownloadStatus status = fileDownload.getStatus();
-        if(status == DownloadStatus.NOT_STARTED)
-            throw new ApiException("Download has not been started yet", HttpStatus.BAD_REQUEST);
-        if(status == DownloadStatus.DOWNLOADED)
-            throw new ApiException("Download has already been completed", HttpStatus.BAD_REQUEST);
-        if(status == DownloadStatus.ABORTED)
-            throw new ApiException("Download has already been aborted", HttpStatus.BAD_REQUEST);
-        
-        fileDownload.setStatus(DownloadStatus.ABORTED);
+        boolean isUpdated = fileDownload.getStatus().compareAndSet(DownloadStatus.DOWNLOADING, DownloadStatus.ABORTED);
+        if(!isUpdated)
+            throw new ApiException("Downloaded cannot be aborted", HttpStatus.BAD_REQUEST);
     }
 }

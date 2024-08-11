@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class FileService {
@@ -103,7 +104,7 @@ public class FileService {
                         .id(UUID.randomUUID().toString())
                         .userId(user.getId())
                         .fileId(file.getId())
-                        .uploadStatus(UploadStatus.NOT_STARTED)
+                        .uploadStatus(new AtomicReference<>(UploadStatus.NOT_STARTED))
                         .build();
         sharedResources.fileUploads.put(fileUploadEntity.getId(), fileUploadEntity);
         return FileCreateResponse

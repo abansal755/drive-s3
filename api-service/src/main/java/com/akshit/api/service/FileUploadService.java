@@ -40,7 +40,7 @@ public class FileUploadService {
             fileHandlingService.putObject(fileName, inputStream, contentLength);
         }
         finally {
-            if(fileUploadEntity.getUploadStatus() != UploadStatus.ABORTED)
+            if(fileUploadEntity.getUploadStatus().get() != UploadStatus.ABORTED)
                 thread.interrupt();
         }
         thread.join();
@@ -62,11 +62,11 @@ public class FileUploadService {
         fileUploadExistenceRequiredValidation(fileUpload);
         fileUploadMatchUserValidation(fileUpload, user);
 
-        if(fileUpload.getUploadStatus() != UploadStatus.NOT_STARTED)
+        if(fileUpload.getUploadStatus().get() != UploadStatus.NOT_STARTED)
             throw new ApiException("Upload has already been started or completed", HttpStatus.FORBIDDEN);
 
         // set status to uploading
-        fileUpload.setUploadStatus(UploadStatus.UPLOADING);
+        fileUpload.getUploadStatus().set(UploadStatus.UPLOADING);
 
         // upload
         FileEntity file = fileRepository.findFileEntityById(fileUpload.getFileId());
@@ -92,7 +92,7 @@ public class FileUploadService {
         fileUploadExistenceRequiredValidation(fileUpload);
         fileUploadMatchUserValidation(fileUpload, user);
 
-        UploadStatus status = fileUpload.getUploadStatus();
+        UploadStatus status = fileUpload.getUploadStatus().get();
         if(status == UploadStatus.NOT_STARTED)
             throw new ApiException("Upload has not been started yet", HttpStatus.BAD_REQUEST);
         if(status == UploadStatus.UPLOADED)
@@ -100,7 +100,7 @@ public class FileUploadService {
         if(status == UploadStatus.ABORTED)
             throw new ApiException("Upload has already been aborted", HttpStatus.BAD_REQUEST);
 
-        fileUpload.setUploadStatus(UploadStatus.ABORTED);
+        fileUpload.getUploadStatus().set(UploadStatus.ABORTED);
         fileRepository.deleteById(fileUpload.getFileId());
     }
 }

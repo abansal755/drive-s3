@@ -18,7 +18,7 @@ public class StreamCloserOnAbortThread extends Thread {
     public void run() {
         try {
             while(!Thread.interrupted()){
-                if(fileUploadEntity.getUploadStatus() == UploadStatus.ABORTED){
+                if(fileUploadEntity.getUploadStatus().get() == UploadStatus.ABORTED){
                     inputStream.close();
                     break;
                 }

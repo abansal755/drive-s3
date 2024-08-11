@@ -22,9 +22,10 @@ public class StreamCloserOnAbortThread extends Thread {
                     inputStream.close();
                     break;
                 }
+                Thread.sleep(1000);
             }
         }
-        catch (IOException ex){
+        catch (IOException | InterruptedException ex){
             System.err.println(ex);
         }
     }

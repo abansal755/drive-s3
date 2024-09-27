@@ -21,4 +21,4 @@ WORKDIR /root/auth-service
 # Build
 RUN mvn package -DskipTests
 
-ENTRYPOINT java -jar target/auth-0.0.1-SNAPSHOT.jar --spring.profiles.active=production
+ENTRYPOINT ["java", "-jar", "target/auth-0.0.1-SNAPSHOT.jar"]
